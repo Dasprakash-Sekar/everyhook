@@ -1,0 +1,47 @@
+{
+  "everyhookFixture": 1,
+  "agent": "gemini-cli",
+  "agentVersion": "0.64.0",
+  "source": "recorded",
+  "os": "win32 x64, Windows 11 Home Single Language 10.0.26300",
+  "node": "24.19.0",
+  "date": "2026-10-17",
+  "event": "post-tool",
+  "nativeEvent": "AfterTool",
+  "variant": "write",
+  "summary": "<project>\\app.env",
+  "stdin": {
+    "session_id": "b6a2809a-12d6-406c-916e-0cf0847b49fa",
+    "transcript_path": "<home>\\.gemini\\tmp\\proj\\chats\\session-2026-10-17T18-56-b6a2809a.jsonl",
+    "cwd": "<project>",
+    "hook_event_name": "AfterTool",
+    "timestamp": "2026-10-17T18:56:19.442Z",
+    "tool_name": "write_file",
+    "tool_input": {
+      "file_path": "<project>\\app.env",
+      "content": "SECRET=1\n"
+    },
+    "tool_response": {
+      "llmContent": "Successfully created and wrote to new file: <project>\\app.env. Here is the updated code:\nSECRET=1\r\n",
+      "returnDisplay": {
+        "fileDiff": "Index: app.env\n===================================================================\n--- app.env\tOriginal\n+++ app.env\tWritten\n@@ -0,0 +1,1 @@\n+SECRET=1\n",
+        "fileName": "app.env",
+        "filePath": "<project>\\app.env",
+        "originalContent": "",
+        "newContent": "SECRET=1\n",
+        "diffStat": {
+          "model_added_lines": 1,
+          "model_removed_lines": 0,
+          "model_added_chars": 8,
+          "model_removed_chars": 0,
+          "user_added_lines": 0,
+          "user_removed_lines": 0,
+          "user_added_chars": 0,
+          "user_removed_chars": 0
+        },
+        "isNewFile": true,
+        "isBuildFile": false
+      }
+    }
+  }
+}

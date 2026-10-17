@@ -10,7 +10,7 @@ export const EFFECTS = {
   blocked: "the action is blocked",
   asked: "the person is asked",
   allowed: "the action is approved",
-  feedback: "the reason goes to the model in place of the result",
+  feedback: "the reason goes to the model as feedback (the tool already ran)",
   continue: "the agent is sent back to work with the reason",
   context: "context is added",
   message: "a message is shown to the person",

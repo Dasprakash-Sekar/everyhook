@@ -1,0 +1,49 @@
+{
+  "everyhookFixture": 1,
+  "agent": "gemini-cli",
+  "agentVersion": "0.64.0",
+  "source": "recorded",
+  "os": "win32 x64, Windows 11 Home Single Language 10.0.26300",
+  "node": "24.19.0",
+  "date": "2026-10-17",
+  "event": "post-tool",
+  "nativeEvent": "AfterTool",
+  "variant": "edit",
+  "summary": "<project>\\notes.txt",
+  "stdin": {
+    "session_id": "b6a2809a-12d6-406c-916e-0cf0847b49fa",
+    "transcript_path": "<home>\\.gemini\\tmp\\proj\\chats\\session-2026-10-17T18-56-b6a2809a.jsonl",
+    "cwd": "<project>",
+    "hook_event_name": "AfterTool",
+    "timestamp": "2026-10-17T18:56:16.850Z",
+    "tool_name": "replace",
+    "tool_input": {
+      "file_path": "<project>\\notes.txt",
+      "instruction": "probe",
+      "old_string": "old line",
+      "new_string": "new line"
+    },
+    "tool_response": {
+      "llmContent": "Successfully modified file: <project>\\notes.txt (1 replacements). Here is the updated code:\nnew line\n",
+      "returnDisplay": {
+        "fileDiff": "Index: notes.txt\n===================================================================\n--- notes.txt\tCurrent\n+++ notes.txt\tProposed\n@@ -1,1 +1,1 @@\n-old line\n+new line\n",
+        "fileName": "notes.txt",
+        "filePath": "<project>\\notes.txt",
+        "originalContent": "old line\n",
+        "newContent": "new line\n",
+        "diffStat": {
+          "model_added_lines": 1,
+          "model_removed_lines": 1,
+          "model_added_chars": 8,
+          "model_removed_chars": 8,
+          "user_added_lines": 0,
+          "user_removed_lines": 0,
+          "user_added_chars": 0,
+          "user_removed_chars": 0
+        },
+        "isNewFile": false,
+        "isBuildFile": false
+      }
+    }
+  }
+}

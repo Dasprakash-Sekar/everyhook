@@ -1,0 +1,22 @@
+{
+  "everyhookFixture": 1,
+  "agent": "codex",
+  "agentVersion": "0.163.0",
+  "source": "recorded",
+  "os": "win32 x64, Windows 11 Home Single Language 10.0.26300",
+  "node": "24.19.0",
+  "date": "2026-10-17",
+  "event": "session-start",
+  "nativeEvent": "SessionStart",
+  "variant": "startup",
+  "summary": "session-start",
+  "stdin": {
+    "session_id": "01a14b38-aaa9-7e53-8f82-b28eeff80eb6",
+    "transcript_path": "<home>\\.codex\\sessions\\2026\\10\\18\\rollout-2026-10-18T00-26-07-01a14b38-aaa9-7e53-8f82-b28eeff80eb6.jsonl",
+    "cwd": "<project>",
+    "hook_event_name": "SessionStart",
+    "model": "gpt-5.5",
+    "permission_mode": "bypassPermissions",
+    "source": "startup"
+  }
+}

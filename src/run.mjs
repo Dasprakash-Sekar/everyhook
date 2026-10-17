@@ -8,14 +8,18 @@ import { translate } from "./translate.mjs";
 const REASON_LIMIT = 4000;
 const clip = (s, n = REASON_LIMIT) => (s.length > n ? `${s.slice(0, n)}...` : s);
 
+/** The events where a deny stops something from happening; at the others it changes nothing or sends the agent back to work. */
+const GUARDED = ["pre-tool", "prompt"];
+
 /**
- * What a failure of the hook itself turns into. A hook that exits with a non-zero code is a deny with its stderr as the reason, always.
- * Anything else that goes wrong (it cannot be started, it runs too long, it prints something that is not an answer) is ignored with a
- * message to the person, or a deny with --fail-closed.
+ * What a failure of the hook itself turns into. A hook that exits with a non-zero code is a deny with its stderr as the reason (at stop,
+ * where a deny sends the agent back to work, only exit code 2 is: a hook that crashed must not do that). Anything else that goes wrong
+ * (it cannot be started, it runs too long, it prints something that is not an answer) is ignored with a message to the person, or, with
+ * --fail-closed, a deny where a deny stops something: before a tool and on a prompt.
  */
-function failureAnswer(detail, failClosed) {
+function failureAnswer(detail, failClosed, event) {
   const text = `everyhook: ${detail}`;
-  return failClosed ? { decision: "deny", reason: text } : { message: `${text}; the hook was ignored` };
+  return failClosed && GUARDED.includes(event) ? { decision: "deny", reason: text } : { message: `${text}; the hook was ignored` };
 }
 
 /**
@@ -46,16 +50,18 @@ export async function execute({ agent, event, hook, hookArgs = [], failClosed = 
       platform,
     });
     if (hookResult.status === "error") failure = { kind: "start", detail: hookResult.error };
-    else if (hookResult.status === "timeout") failure = { kind: "timeout", detail: `the hook "${hookName(hook)}" did not finish in ${Math.round(timeoutMs / 1000)} seconds` };
+    else if (hookResult.status === "timeout") failure = { kind: "timeout", detail: `the hook "${hookName(hook)}" did not finish in ${Number((timeoutMs / 1000).toFixed(1))} seconds` };
     else if (hookResult.code !== 0) {
       const text = clip(hookResult.stderr.trim());
-      answer = { decision: "deny", reason: text || `The hook "${hookName(hook)}" exited with code ${hookResult.code}.` };
+      const first = text.split(/\r?\n/)[0];
+      if (event === "stop" && hookResult.code !== 2) failure = { kind: "exit", detail: `the hook "${hookName(hook)}" exited with code ${hookResult.code}${first ? `: ${first}` : ""}` };
+      else answer = { decision: "deny", reason: text || `The hook "${hookName(hook)}" exited with code ${hookResult.code}.` };
     } else {
       const read = readAnswer(hookResult.stdout);
       if (read.ok) answer = read.answer; else failure = { kind: "invalid", detail: `${read.problem} ("${hookName(hook)}")` };
     }
   }
-  if (failure) answer = failureAnswer(failure.detail, failClosed);
+  if (failure) answer = failureAnswer(failure.detail, failClosed, event);
 
   const out = translate(mod, event, answer, { nativeEvent, hook });
   return { doc, hook: hookResult, answer, failure, native: { stdout: out.stdout, exit: out.exit }, effect: out.effect, notes: out.notes, nativeEvent };

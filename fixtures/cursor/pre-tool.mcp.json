@@ -1,0 +1,43 @@
+{
+  "everyhookFixture": 1,
+  "agent": "cursor",
+  "agentVersion": "documented",
+  "source": "documented",
+  "os": "any",
+  "date": "2026-10-17",
+  "event": "pre-tool",
+  "nativeEvent": "beforeMCPExecution",
+  "variant": "mcp",
+  "summary": "linear: list_issues",
+  "stdin": {
+    "conversation_id": "conv-0001",
+    "generation_id": "gen-0001",
+    "model": "claude-opus-4-7-thinking-max",
+    "model_id": "claude-opus-4-7",
+    "model_params": [
+      {
+        "id": "thinking",
+        "value": "true"
+      },
+      {
+        "id": "context",
+        "value": "1m"
+      },
+      {
+        "id": "effort",
+        "value": "max"
+      }
+    ],
+    "hook_event_name": "beforeMCPExecution",
+    "cursor_version": "1.7.2",
+    "workspace_roots": [
+      "<project>"
+    ],
+    "user_email": null,
+    "transcript_path": null,
+    "tool_name": "list_issues",
+    "tool_input": "{\"team\":\"core\"}",
+    "mcp_server_name": "linear",
+    "command": "npx -y linear-mcp"
+  }
+}

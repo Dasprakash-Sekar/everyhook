@@ -1,0 +1,20 @@
+{
+  "everyhookFixture": 1,
+  "agent": "claude-code",
+  "agentVersion": "2.1.302",
+  "source": "recorded",
+  "os": "win32 x64, Windows 11 Home Single Language 10.0.26300",
+  "node": "24.19.0",
+  "date": "2026-10-17",
+  "event": "session-start",
+  "nativeEvent": "SessionStart",
+  "variant": "startup",
+  "summary": "session-start",
+  "stdin": {
+    "session_id": "40bd2428-eb69-4aa8-8ef8-24d70845ebe9",
+    "transcript_path": "<home>\\.claude\\projects\\<project>\\40bd2428-eb69-4aa8-8ef8-24d70845ebe9.jsonl",
+    "cwd": "<project>",
+    "hook_event_name": "SessionStart",
+    "source": "startup"
+  }
+}

@@ -7,17 +7,14 @@ import { fillPlaceholders } from "./fixtures.mjs";
 
 /** How the hook's answer reads: "deny", "ask", "allow", "no opinion", "exit 3 (deny)", "timeout", ... */
 function answerWord(r) {
-  if (r.failure) return r.failure.kind === "timeout" ? "timeout" : r.failure.kind === "start" ? "could not start" : r.failure.kind === "invalid" ? "invalid output" : "no input";
+  if (r.failure) return { timeout: "timeout", start: "could not start", invalid: "invalid output", input: "no input" }[r.failure.kind] || `exit ${r.hook.code} (ignored)`;
   if (r.hook && r.hook.code !== 0) return `exit ${r.hook.code} (deny)`;
   return r.answer.decision || (r.answer.context || r.answer.message ? "context or message" : "no opinion");
 }
 
 /** What the agent would do, in a short phrase that includes fail open and fail closed. */
-function outcomeWord(r, failClosed) {
-  if (r.failure) {
-    const head = failClosed ? "fail closed" : "fail open";
-    return `${head}: ${r.failure.detail}`;
-  }
+function outcomeWord(r) {
+  if (r.failure) return `${r.effect === "blocked" ? "fail closed" : "fail open"}: ${r.failure.detail}`;
   const base = EFFECTS[r.effect] || r.effect;
   return r.notes.length ? `${base} (${r.notes.join("; ")})` : base;
 }
@@ -35,7 +32,7 @@ export async function bench({ hook, hookArgs = [], fixtures, failClosed = false,
     const r = await execute({ agent: f.agent, event: f.event, hook, hookArgs, failClosed, timeoutMs, nativeText: JSON.stringify(stdin), env, cwd: project, platform });
     results.push({
       file: item.file, agent: f.agent, version: f.agentVersion, source: f.source, os: f.os, date: f.date, event: f.event, variant: f.variant, summary: f.summary,
-      answer: answerWord(r), effect: r.failure ? (failClosed ? "blocked" : "none") : r.effect, outcome: outcomeWord(r, failClosed), notes: r.notes,
+      answer: answerWord(r), effect: r.effect, outcome: outcomeWord(r), notes: r.notes,
       native: { stdout: r.native.stdout, exit: r.native.exit },
       hook: r.hook ? { status: r.hook.status, exit: r.hook.code, ms: r.hook.ms, stderr: r.hook.stderr.trim().slice(0, 300) } : null,
       failure: r.failure,

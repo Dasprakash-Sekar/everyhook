@@ -36,10 +36,9 @@ export function missingProgram(line, { env, platform }) {
   if (!first || /[$~=]/.test(first) || first.startsWith("&") || SHELL_WORDS.has(first)) return null;
   if (/[\\/]/.test(first)) {
     if (!isAbs(first, platform)) return null;
-    return exists(first) || (platform === "win32" && [".exe", ".cmd", ".bat", ".com"].some((x) => exists(first + x))) ? null : `the program does not exist: ${first}`;
-  }
-  if (!findOnPath(first, env, platform)) return `the program is not on PATH: ${first}`;
-  const base = path.basename(first).toLowerCase();
+    if (!(exists(first) || (platform === "win32" && [".exe", ".cmd", ".bat", ".com"].some((x) => exists(first + x))))) return `the program does not exist: ${first}`;
+  } else if (!findOnPath(first, env, platform)) return `the program is not on PATH: ${first}`;
+  const base = path.basename(first.replace(/\\/g, "/")).toLowerCase();
   if (INTERPRETERS.has(base)) {
     const script = words.slice(1).find((w) => !w.startsWith("-"));
     if (script && isAbs(script, platform) && !exists(script)) return `the script does not exist: ${script}`;

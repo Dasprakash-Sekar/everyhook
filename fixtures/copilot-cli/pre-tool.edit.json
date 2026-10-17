@@ -1,0 +1,24 @@
+{
+  "everyhookFixture": 1,
+  "agent": "copilot-cli",
+  "agentVersion": "1.0.98",
+  "source": "recorded",
+  "os": "win32 x64, Windows 11 Home Single Language 10.0.26300",
+  "node": "24.19.0",
+  "date": "2026-10-17",
+  "event": "pre-tool",
+  "nativeEvent": "preToolUse",
+  "variant": "edit",
+  "summary": "<project>\\notes.txt",
+  "stdin": {
+    "sessionId": "9cdc299e-bc26-4d5b-8c26-646d26b072a3",
+    "timestamp": 1792263382846,
+    "cwd": "<project>",
+    "toolName": "edit",
+    "toolArgs": {
+      "path": "<project>\\notes.txt",
+      "old_str": "old line",
+      "new_str": "new line"
+    }
+  }
+}

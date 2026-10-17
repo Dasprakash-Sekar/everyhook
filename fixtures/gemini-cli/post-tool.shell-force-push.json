@@ -1,0 +1,29 @@
+{
+  "everyhookFixture": 1,
+  "agent": "gemini-cli",
+  "agentVersion": "0.64.0",
+  "source": "recorded",
+  "os": "win32 x64, Windows 11 Home Single Language 10.0.26300",
+  "node": "24.19.0",
+  "date": "2026-10-17",
+  "event": "post-tool",
+  "nativeEvent": "AfterTool",
+  "variant": "shell-force-push",
+  "summary": "git push --force origin main",
+  "stdin": {
+    "session_id": "b6a2809a-12d6-406c-916e-0cf0847b49fa",
+    "transcript_path": "<home>\\.gemini\\tmp\\proj\\chats\\session-2026-10-17T18-56-b6a2809a.jsonl",
+    "cwd": "<project>",
+    "hook_event_name": "AfterTool",
+    "timestamp": "2026-10-17T18:56:25.274Z",
+    "tool_name": "run_shell_command",
+    "tool_input": {
+      "command": "git push --force origin main",
+      "description": "probe"
+    },
+    "tool_response": {
+      "llmContent": "<untrusted_context>\nOutput: fatal: not a git repository (or any of the parent directories): .git\nExit Code: 1\nProcess Group PGID: 21188\n</untrusted_context>",
+      "returnDisplay": "fatal: not a git repository (or any of the parent directories): .git"
+    }
+  }
+}

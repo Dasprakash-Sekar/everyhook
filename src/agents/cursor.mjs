@@ -74,6 +74,7 @@ export const FORMS = {
   "pre-tool": permission,
   "post-tool": { context: (a) => ({ additional_context: a.context }) },
   prompt: {
+    messageWith: "deny",
     deny: (a) => ({ continue: false, user_message: a.message || a.reason }),
     allow: () => ({ continue: true }),
     neutral: () => ({ continue: true }),

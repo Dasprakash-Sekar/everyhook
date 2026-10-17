@@ -1,0 +1,24 @@
+{
+  "everyhookFixture": 1,
+  "agent": "gemini-cli",
+  "agentVersion": "0.64.0",
+  "source": "recorded",
+  "os": "win32 x64, Windows 11 Home Single Language 10.0.26300",
+  "node": "24.19.0",
+  "date": "2026-10-17",
+  "event": "pre-tool",
+  "nativeEvent": "BeforeTool",
+  "variant": "read",
+  "summary": "<project>\\notes.txt",
+  "stdin": {
+    "session_id": "b6a2809a-12d6-406c-916e-0cf0847b49fa",
+    "transcript_path": "<home>\\.gemini\\tmp\\proj\\chats\\session-2026-10-17T18-56-b6a2809a.jsonl",
+    "cwd": "<project>",
+    "hook_event_name": "BeforeTool",
+    "timestamp": "2026-10-17T18:56:12.372Z",
+    "tool_name": "read_file",
+    "tool_input": {
+      "file_path": "<project>\\notes.txt"
+    }
+  }
+}

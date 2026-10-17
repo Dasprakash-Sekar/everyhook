@@ -1,0 +1,30 @@
+{
+  "everyhookFixture": 1,
+  "agent": "claude-code",
+  "agentVersion": "2.1.302",
+  "source": "recorded",
+  "os": "win32 x64, Windows 11 Home Single Language 10.0.26300",
+  "node": "24.19.0",
+  "date": "2026-10-17",
+  "event": "pre-tool",
+  "nativeEvent": "PreToolUse",
+  "variant": "shell-force-push",
+  "summary": "git push --force origin main",
+  "stdin": {
+    "session_id": "40bd2428-eb69-4aa8-8ef8-24d70845ebe9",
+    "transcript_path": "<home>\\.claude\\projects\\<project>\\40bd2428-eb69-4aa8-8ef8-24d70845ebe9.jsonl",
+    "cwd": "<project>",
+    "prompt_id": "c74793dd-2410-41a4-a92a-f1bf4486478b",
+    "permission_mode": "bypassPermissions",
+    "effort": {
+      "level": "medium"
+    },
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "git push --force origin main",
+      "description": "probe"
+    },
+    "tool_use_id": "toolu_3"
+  }
+}

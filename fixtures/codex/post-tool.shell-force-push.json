@@ -1,0 +1,28 @@
+{
+  "everyhookFixture": 1,
+  "agent": "codex",
+  "agentVersion": "0.163.0",
+  "source": "recorded",
+  "os": "win32 x64, Windows 11 Home Single Language 10.0.26300",
+  "node": "24.19.0",
+  "date": "2026-10-17",
+  "event": "post-tool",
+  "nativeEvent": "PostToolUse",
+  "variant": "shell-force-push",
+  "summary": "git push --force origin main",
+  "stdin": {
+    "session_id": "01a14b38-aaa9-7e53-8f82-b28eeff80eb6",
+    "turn_id": "01a14b38-aaf1-7c23-91b7-b4c10ab7aded",
+    "transcript_path": "<home>\\.codex\\sessions\\2026\\10\\18\\rollout-2026-10-18T00-26-07-01a14b38-aaa9-7e53-8f82-b28eeff80eb6.jsonl",
+    "cwd": "<project>",
+    "hook_event_name": "PostToolUse",
+    "model": "gpt-5.5",
+    "permission_mode": "bypassPermissions",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "git push --force origin main"
+    },
+    "tool_response": "fatal: not a git repository (or any of the parent directories): .git\n",
+    "tool_use_id": "call_3"
+  }
+}

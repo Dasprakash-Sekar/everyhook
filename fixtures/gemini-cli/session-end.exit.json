@@ -1,0 +1,21 @@
+{
+  "everyhookFixture": 1,
+  "agent": "gemini-cli",
+  "agentVersion": "0.64.0",
+  "source": "recorded",
+  "os": "win32 x64, Windows 11 Home Single Language 10.0.26300",
+  "node": "24.19.0",
+  "date": "2026-10-17",
+  "event": "session-end",
+  "nativeEvent": "SessionEnd",
+  "variant": "exit",
+  "summary": "session-end",
+  "stdin": {
+    "session_id": "b6a2809a-12d6-406c-916e-0cf0847b49fa",
+    "transcript_path": "<home>\\.gemini\\tmp\\proj\\chats\\session-2026-10-17T18-56-b6a2809a.jsonl",
+    "cwd": "<project>",
+    "hook_event_name": "SessionEnd",
+    "timestamp": "2026-10-17T18:56:31.019Z",
+    "reason": "exit"
+  }
+}

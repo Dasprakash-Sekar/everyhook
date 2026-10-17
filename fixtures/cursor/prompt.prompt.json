@@ -1,0 +1,41 @@
+{
+  "everyhookFixture": 1,
+  "agent": "cursor",
+  "agentVersion": "documented",
+  "source": "documented",
+  "os": "any",
+  "date": "2026-10-17",
+  "event": "prompt",
+  "nativeEvent": "beforeSubmitPrompt",
+  "variant": "prompt",
+  "summary": "hello",
+  "stdin": {
+    "conversation_id": "conv-0001",
+    "generation_id": "gen-0001",
+    "model": "claude-opus-4-7-thinking-max",
+    "model_id": "claude-opus-4-7",
+    "model_params": [
+      {
+        "id": "thinking",
+        "value": "true"
+      },
+      {
+        "id": "context",
+        "value": "1m"
+      },
+      {
+        "id": "effort",
+        "value": "max"
+      }
+    ],
+    "hook_event_name": "beforeSubmitPrompt",
+    "cursor_version": "1.7.2",
+    "workspace_roots": [
+      "<project>"
+    ],
+    "user_email": null,
+    "transcript_path": null,
+    "prompt": "hello",
+    "attachments": []
+  }
+}
