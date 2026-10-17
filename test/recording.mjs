@@ -15,7 +15,7 @@ export const LOG_HOOK = path.join(ROOT, "examples", "log-tool-calls.mjs");
 /** The steps of the recording script for a world: a file to read, to edit, .env to write, a force push, a harmless command. */
 export function steps(agent, w) {
   const notes = path.join(w.work, "notes.txt");
-  // Gemini CLI refuses to read or write a file called .env before any hook runs, so it gets another name
+  // Gemini CLI refuses to read or write a file whose name starts with .env before any hook runs (Path not in workspace), so it gets another name
   const env = path.join(w.work, agent === "gemini-cli" ? "app.env" : ".env");
   const all = [
     { read: notes },

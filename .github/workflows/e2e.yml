@@ -1,11 +1,12 @@
 name: e2e
 
 # The checks that run the real coding agents: what each does with the raw output of a hook (exit codes, JSON in its own dialect, ask, text that
-# is not JSON, a hook that runs too long), and everyhook installed into each (block-force-push and log-tool-calls, every answer at every
-# event, --fail-closed, a refused prompt, context at the start of a session, a stop hook that sends the agent back to work), then uninstalled
-# to the exact bytes. Claude Code, Codex CLI, Gemini CLI and GitHub Copilot CLI each talk to a fake API on 127.0.0.1, so the checks cost nothing
-# and need no login. On Linux, macOS and Windows. Optional by design: an agent that cannot be installed has its checks skipped, and the log says
-# which. Weekly, so a release of an agent that changes how it treats a hook shows up here.
+# is not JSON, a hook that runs too long), and everyhook installed into each (block-force-push, log-tool-calls and protect-env-files, every answer
+# at every event, --matcher, --scope project, --fail-closed, a missing everyhook, a refused prompt, context at the start of a session, a stop
+# hook that sends the agent back to work), then uninstalled to the exact bytes. Claude Code, Codex CLI, Gemini CLI and GitHub Copilot CLI each
+# talk to a fake API on 127.0.0.1, so the checks cost nothing and need no login. On Linux, macOS and Windows. Optional by design: an agent that
+# cannot be installed has its checks skipped, and the log says which. Weekly, so a release of an agent that changes how it treats a hook shows
+# up here.
 on:
   push:
     branches: [main]

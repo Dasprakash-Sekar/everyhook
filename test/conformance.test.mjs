@@ -56,7 +56,7 @@ test("the shell that ran the hook on Windows is recorded for the agents that wer
 });
 
 test("every cell of the table that says binary names a case that a recording holds, with the outcome the cell states", () => {
-  const known = new Set(["install.user", "events", "timeout-unit", "windows-shell", "context", "allow-json", "env", "env-github"]);
+  const known = new Set(["install.user", "events", "timeout-unit", "windows-shell", "context", "allow-json", "env", "env-github", "matcher-shell", "adapter-context"]);
   for (const row of ROWS) for (const agent of AGENTS) {
     const c = row.cells[agent];
     if (c.basis !== "binary") continue;

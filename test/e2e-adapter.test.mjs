@@ -139,7 +139,7 @@ for (const agent of AGENTS) {
     const at = (name) => path.join(s.sb.work, name);
     fs.writeFileSync(at("keys.secret"), "key=old\n");
     fs.writeFileSync(at("readme.txt"), "alpha\n");
-    // Gemini CLI refuses to write a file called .env by itself, before any hook: what it is given to protect is the pattern below
+    // Gemini CLI refuses to write a file whose name starts with .env by itself, before any hook (Path not in workspace): what it is given to protect is the pattern below
     const steps = [
       { write: { path: at("db.secret"), content: "pw=1\n" } },
       { write: { path: at("notes.txt"), content: "ok\n" } },
