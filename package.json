@@ -1,0 +1,47 @@
+{
+  "name": "everyhook",
+  "version": "1.0.0",
+  "description": "Write a hook once, run it in every coding agent: Claude Code, Codex CLI, Gemini CLI, GitHub Copilot CLI and Cursor. One contract for the hook, an adapter per agent, install and uninstall into each agent's configuration, and a bench that puts the hook to the JSON each real agent sends. Zero dependencies, zero tokens.",
+  "type": "module",
+  "bin": {
+    "everyhook": "bin/everyhook.mjs"
+  },
+  "files": [
+    "bin",
+    "src",
+    "examples",
+    "fixtures",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node --test"
+  },
+  "repository": "github:nrzz/everyhook",
+  "homepage": "https://nrzz.github.io/claude-code-toolkit/",
+  "bugs": "https://github.com/nrzz/everyhook/issues",
+  "keywords": [
+    "hooks",
+    "agent-hooks",
+    "claude-code",
+    "codex",
+    "openai-codex",
+    "gemini-cli",
+    "github-copilot",
+    "copilot-cli",
+    "cursor",
+    "guardrails",
+    "cli",
+    "nodejs",
+    "zero-dependency",
+    "developer-tools",
+    "agentic-coding",
+    "ai-coding",
+    "coding-agents"
+  ],
+  "author": "Naresh Prabu",
+  "license": "MIT"
+}
