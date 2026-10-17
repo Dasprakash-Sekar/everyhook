@@ -76,7 +76,7 @@ export function restoreText(res, ctx) {
     if (r.reason) lines.push(`${pad(r.agent, 12)} no backup  ${r.file}`);
     else {
       lines.push(`${pad(r.agent, 12)} ${ctx.dryRun ? "would put back" : "put back"} ${path.basename(r.from)}  ${r.file}`);
-      if (r.others) lines.push(`  ${r.others} older ${r.others === 1 ? "backup" : "backups"} stay`);
+      if (r.others) lines.push(`  ${r.others} older ${r.others === 1 ? "backup stays" : "backups stay"}`);
       if (r.savedCurrent) lines.push(`  the file as it was is saved as ${path.basename(r.savedCurrent)}`);
     }
   }

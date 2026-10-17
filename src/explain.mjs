@@ -100,7 +100,7 @@ export function explainText(target) {
   lines.push(`${mod.name}, ${target.event} (${mod.NATIVE[target.event]}): ${EVENT_INFO[target.event]}`, "", "What everyhook prints for each answer of the hook:");
   for (const row of eventTable(target.agent, target.event)) {
     lines.push(`  ${row.answer.padEnd(13)} ${row.native === null ? "(nothing)" : row.native}`);
-    lines.push(`  ${"".padEnd(13)} ${wrap(`${EFFECTS[row.effect] || row.effect}${row.notes.length ? `; ${row.notes.join("; ")}` : ""}`, 90, 14)}`);
+    lines.push(`  ${"".padEnd(13)} ${wrap(`${EFFECTS[row.effect] || row.effect}${row.notes.length ? `; ${row.notes.join("; ")}` : ""}`, 90, 16)}`);
   }
   lines.push("", `It can take: ${["deny", "ask", "allow", "context", "message"].filter((k) => f[k] || (k === "message" && f.messageWith)).join(", ") || "nothing"}.`);
   return `${lines.join("\n")}\n`;
