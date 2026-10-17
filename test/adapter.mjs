@@ -10,6 +10,7 @@ export const HOOKS = {
   block: path.join(ROOT, "examples", "block-force-push.mjs"),
   log: path.join(ROOT, "examples", "log-tool-calls.mjs"),
   answer: path.join(ROOT, "test", "answer-hook.mjs"),
+  protect: path.join(ROOT, "examples", "protect-env-files.mjs"),
 };
 
 // What each agent did with an answer at a tool event, through everyhook: the same for the four agents.

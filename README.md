@@ -537,6 +537,8 @@ For each binary: `install` put `examples/block-force-push.mjs` and `examples/log
 
 `install --scope project` wrote the file of the project (`.claude/settings.json`, `.codex/hooks.json`, `.gemini/settings.json`, `.github/hooks/everyhook.json`), wrote nothing to the home folder, and each agent ran the hook from it, before and after the call (Codex CLI with `--dangerously-bypass-hook-trust`, Gemini CLI in a folder it was told to trust).
 
+`--matcher`, in each agent's own syntax (`Bash`, `Bash`, `run_shell_command`, `bash|powershell`), limited the hook to the shell tool: the file write that followed ran, and the hook never saw it. `protect-env-files` blocked a write and an edit of a protected path through each agent's own write and edit tools, with the reason in front of the model, and left another file alone that it wrote and another that it edited (on Gemini CLI the protected files were the ones listed in `EVERYHOOK_PROTECT`, because Gemini CLI refuses to write a `.env` file by itself).
+
 When everyhook itself cannot start (its files were moved or deleted, and the entries still name them), the four agents differ, and `--fail-closed` changes the result only on Claude Code, which has a field for it:
 
 | everyhook cannot start | Claude Code | Codex CLI | Gemini CLI | Copilot CLI |
@@ -554,7 +556,7 @@ Two problems that `list` reports were put to the binaries that have them. Gemini
 
 ### The tests and CI
 
-**293 automated tests** (`npm test`; that is what `node --test` reports, less each of the 15 helper files that it lists as a test and that does nothing without its variable). 41 of them put the code to the real binaries and are skipped unless `E2E_CLAUDE`, `E2E_CODEX`, `E2E_GEMINI` and `E2E_COPILOT` name them; the others need nothing but Node, and a few skip themselves where a system lacks something (the right to make symlinks, on Windows). They cover every module, the editing of JSON by text with a fuzz round trip of 400 cases, ten layouts that `uninstall` must give back to the byte, and the 180 cases of the translation table (5 agents, 6 events, 6 answers).
+**301 automated tests** (`npm test`; that is what `node --test` reports, less each of the 15 helper files that it lists as a test and that does nothing without its variable). 49 of them put the code to the real binaries and are skipped unless `E2E_CLAUDE`, `E2E_CODEX`, `E2E_GEMINI` and `E2E_COPILOT` name them; the others need nothing but Node, and a few skip themselves where a system lacks something (the right to make symlinks, on Windows). They cover every module, the editing of JSON by text with a fuzz round trip of 400 cases, ten layouts that `uninstall` must give back to the byte, and the 180 cases of the translation table (5 agents, 6 events, 6 answers).
 
 `test.yml` runs the suite on Windows, macOS and Linux with Node 20, 22 and 24, and on Linux with Node 18. `e2e.yml` installs the four agents from npm on each of the three systems and runs the real-binary checks; it runs on every push and every week, so that a new version of an agent that changes any cell above fails there first. An agent that cannot be installed skips its checks with the reason and does not fail the run.
 

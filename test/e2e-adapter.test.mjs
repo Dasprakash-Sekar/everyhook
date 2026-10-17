@@ -27,6 +27,8 @@ const configFiles = (agent, sb) => ({
 // Gemini CLI hands the model its refusal as { "error": "..." }
 // the file `install --scope project` writes, relative to the project
 const PROJECT_FILE = { "claude-code": ".claude/settings.json", codex: ".codex/hooks.json", "gemini-cli": ".gemini/settings.json", "copilot-cli": ".github/hooks/everyhook.json" };
+// --matcher in each agent's own syntax, for the shell tool
+const SHELL_MATCHER = { "claude-code": "Bash", codex: "Bash", "gemini-cli": "run_shell_command", "copilot-cli": "bash|powershell" };
 const plain = (text) => { try { const j = JSON.parse(text); return j && typeof j.error === "string" ? j.error : text; } catch { return text; } };
 const bytesOf = (files) => files.map((f) => (fs.existsSync(f) ? fs.readFileSync(f).toString("hex") : null));
 
@@ -120,6 +122,43 @@ for (const agent of AGENTS) {
     for (const f of configFiles(agent, s.sb)) assert.ok(!fs.existsSync(f) || !fs.readFileSync(f, "utf8").includes("everyhook"), "nothing was written to the home folder");
     assert.deepEqual(o.everyhookLog.map((d) => d.event), ["pre-tool", "post-tool"], "the hook of the project ran before and after the call");
     assert.ok(o.results[0].text.includes("PROJ-ONE"), "the call ran");
+  });
+
+  test(`${agent}: --matcher ${SHELL_MATCHER[agent]} limits the hook to the shell tool`, { skip, timeout: T }, async () => {
+    const s = setup(agent, "matcher", ["log"]);
+    const target = path.join(s.sb.work, "m.txt");
+    const o = await session(s, [{ shell: "echo M-ONE" }, { write: { path: target, content: "hello" } }], { before: () => install(s, "log", ["--event", "pre-tool,post-tool", "--matcher", SHELL_MATCHER[agent]]) });
+    assert.equal(o.r.code, 0, `${agent}: ${o.r.err.slice(0, 300)}`);
+    assert.equal(o.results.length, 2, "both calls got a result: the write ran");
+    assert.deepEqual(o.everyhookLog.map((d) => d.event), ["pre-tool", "post-tool"], "the hook saw the shell call and not the write");
+    assert.ok(o.everyhookLog.every((d) => d.tool.kind === "shell"));
+  });
+
+  test(`${agent}: protect-env-files blocks a write and an edit of a protected path through this agent's own tools, and leaves other files alone`, { skip, timeout: T }, async () => {
+    const s = setup(agent, "protect", ["protect"]);
+    const at = (name) => path.join(s.sb.work, name);
+    fs.writeFileSync(at("keys.secret"), "key=old\n");
+    fs.writeFileSync(at("readme.txt"), "alpha\n");
+    // Gemini CLI refuses to write a file called .env by itself, before any hook: what it is given to protect is the pattern below
+    const steps = [
+      { write: { path: at("db.secret"), content: "pw=1\n" } },
+      { write: { path: at("notes.txt"), content: "ok\n" } },
+      { edit: { path: at("keys.secret"), old: "key=old", new: "key=new" } },
+      { edit: { path: at("readme.txt"), old: "alpha", new: "gamma" } },
+      ...(agent === "gemini-cli" ? [] : [{ write: { path: at(".env.local"), content: "SECRET=1\n" } }]),
+    ];
+    const o = await session(s, steps, { env: { EVERYHOOK_PROTECT: "*.secret" }, before: () => install(s, "protect", ["--event", "pre-tool"]) });
+    assert.equal(o.r.code, 0, `${agent}: ${o.r.err.slice(0, 300)}`);
+    assert.equal(o.results.length, steps.length, "every call got a result");
+    const seen = (i) => plain(o.results[i].text);
+    const lines = (f) => fs.readFileSync(f, "utf8").replace(/\r\n/g, "\n");
+    assert.match(seen(0), /"db\.secret" is protected and cannot be written/, "the reason reached the model");
+    assert.match(seen(2), /"keys\.secret" is protected and cannot be edited/);
+    if (agent !== "gemini-cli") assert.match(seen(4), /"\.env\.local" is protected and cannot be written/);
+    assert.ok(!fs.existsSync(at("db.secret")) && !fs.existsSync(at(".env.local")), "the protected files were not written");
+    assert.equal(lines(at("keys.secret")), "key=old\n", "the protected file was not edited");
+    assert.equal(lines(at("notes.txt")), "ok\n", "another file was written");
+    assert.equal(lines(at("readme.txt")), "gamma\n", "another file was edited");
   });
 
   test(`${agent}: a prompt that a hook refuses`, { skip, timeout: T }, async () => {
