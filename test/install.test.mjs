@@ -375,3 +375,23 @@ test("usage errors: no agents for install, a hook that does not exist, an unknow
   assert.equal(missing.code, 1);
   assert.match(missing.err, /the hook does not exist/);
 });
+
+test("install says so when everyhook runs from npm's npx cache: the entries name a folder that npm may delete", async () => {
+  const w = world("inst");
+  const r = await run(["install", EXAMPLE, "--agent", "claude-code"], { w, everyhook: path.join(w.base, "npm-cache", "_npx", "abc123", "node_modules", "everyhook", "bin", "everyhook.mjs") });
+  assert.equal(r.code, 0);
+  assert.match(r.out, /Still to do:\n\s+everyhook runs from npm's temporary folder \(_npx\), which npm may delete, and the entries name it\. Keep a copy that stays/);
+  const fine = await run(["install", EXAMPLE, "--agent", "cursor"], { w });
+  assert.doesNotMatch(fine.out, /_npx/);
+});
+
+test("Codex CLI allows a SessionEnd hook 3 seconds: the entry says 3 (it warns at every start about more), and install says so", async () => {
+  const w = world("inst");
+  const r = await run(["install", EXAMPLE, "--agent", "codex,claude-code", "--event", "session-end,stop", "--timeout", "30"], { w });
+  assert.match(r.out, /note: session-end: Codex CLI allows 3 seconds, so the timeout is 3, not 30/);
+  const codex = w.readJson(files(w).codex).hooks;
+  assert.equal(codex.SessionEnd[0].hooks[0].timeout, 3);
+  assert.match(codex.SessionEnd[0].hooks[0].command, /--timeout 1 -- /, "everyhook stops the hook one second before");
+  assert.equal(codex.Stop[0].hooks[0].timeout, 30);
+  assert.equal(w.readJson(files(w)["claude-code"]).hooks.SessionEnd[0].hooks[0].timeout, 30, "the others keep what was asked");
+});

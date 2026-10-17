@@ -125,11 +125,12 @@ export function benchJson(res, ctx) {
 export function benchText(res, ctx) {
   const lines = [`everyhook bench ${path.basename(ctx.hook)}${ctx.failClosed ? " (fail closed)" : ""}`];
   let last = "";
+  const vw = Math.max(22, ...res.results.filter((x) => !x.error).map((x) => x.variant.length));
   for (const r of res.results) {
     if (r.error) { lines.push("", `${r.file}: ${r.error}`); continue; }
-    const head = `${r.agent} ${r.version}  ${r.source === "recorded" ? `recorded ${r.date}, ${r.os}` : "documented, not recorded"}`;
+    const head = r.source === "recorded" ? `${r.agent} ${r.version}  recorded ${r.date}, ${r.os}` : `${r.agent}  documented, not recorded`;
     if (head !== last) { lines.push("", head); last = head; }
-    lines.push(`  ${pad(r.event, 14)} ${pad(r.variant, 22)} ${pad(r.answer, 14)} ${r.outcome}`);
+    lines.push(`  ${pad(r.event, 12)} ${pad(r.variant, vw)} ${pad(r.answer, 14)} ${r.outcome}`);
     lines.push(`      ${r.native.stdout === null ? "(nothing printed)" : r.native.stdout}`);
     if (r.hook && r.hook.stderr && r.hook.exit !== 0) lines.push(`      hook stderr: ${r.hook.stderr}`);
   }

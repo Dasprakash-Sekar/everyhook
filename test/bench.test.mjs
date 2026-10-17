@@ -17,10 +17,10 @@ test("the text report: a header per agent with its version and how it was got, a
   assert.equal(r.code, 0, r.all);
   const lines = r.out.split("\n");
   assert.equal(lines[0], "everyhook bench block-force-push.mjs");
-  assert.match(r.out, /\ncodex 0\.163\.0  recorded 2026-10-\d\d, win32 x64, .+\n/.source.length ? /\ncodex 0\.163\.0 {2}recorded \d{4}-\d\d-\d\d, \S+ \S+, .+\n/ : /x/);
+  assert.match(r.out, /\ncodex 0\.163\.0 {2}recorded \d{4}-\d\d-\d\d, \S+ \S+, .+\n/);
   assert.match(r.out, /\n {2}pre-tool {1,}shell-force-push {1,}deny {1,}the action is blocked\n {6}\{"hookSpecificOutput":\{"hookEventName":"PreToolUse","permissionDecision":"deny"/);
   assert.match(r.out, /\n {2}pre-tool {1,}shell-harmless {1,}no opinion {1,}nothing changes\n {6}\(nothing printed\)\n/);
-  assert.match(r.out, /\ncursor documented {2}documented, not recorded\n/);
+  assert.match(r.out, /\ncursor {2}documented, not recorded\n/);
   assert.match(r.out, /\n {2}pre-tool {1,}shell-force-push {1,}deny {1,}the action is blocked\n {6}\{"permission":"deny","agent_message":"Force-pushing the protected branch \\"main\\" is blocked/);
 });
 

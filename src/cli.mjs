@@ -22,9 +22,10 @@ and may print one JSON document on stdout; everyhook turns each agent's own JSON
 Run (the agents call this; it is what install writes into their configuration):
   run        --agent <agent> --event <event> [--fail-closed] [--timeout <seconds>] -- <hook> [args...]
              reads the agent's JSON on stdin, runs the hook with the contract's document, prints the agent's JSON
-             (or nothing) on stdout. A hook that exits non-zero is a deny with its stderr as the reason. A hook that
-             cannot start, times out or prints something that is not an answer is ignored with a message, or denied
-             with --fail-closed. EVERYHOOK_DEBUG=1 logs to stderr. With --json it prints the whole result instead.
+             (or nothing) on stdout. A hook that exits non-zero is a deny with its stderr as the reason (at stop, only
+             exit code 2 is). A hook that cannot start, runs past --timeout (default 25) or prints something that is not
+             an answer is ignored with a message, or, with --fail-closed, denied before a tool and on a prompt.
+             EVERYHOOK_DEBUG=1 logs to stderr. With --json it prints the whole result instead.
 
 Change (they edit the agents' configuration files after a backup, and take --dry-run):
   install    <hook> (--agent <a,b,...> | --all) [--event <e,f,...|all>] [--scope user|project] [--project <dir>]
@@ -234,6 +235,8 @@ export async function main(argv, io = {}) {
         const plan = planInstall({ hook, agents, events, scope: o.scope, project, matcher: o.matcher, timeout: o.timeout, failClosed: o.failClosed, everyhook, env, platform });
         if (!o.dryRun) applyPlan(plan, { now: io.now ? new Date(io.now) : new Date() });
         const needs = [...new Set(plan.results.filter((r) => r.action !== "refused").flatMap((r) => r.needs.map((n) => `${r.agent}: ${n}`)))];
+        // `npx` runs a copy in npm's cache, which npm may delete; the entries name the path of this copy
+        if (/[\\/]_npx[\\/]/.test(everyhook)) needs.unshift("everyhook runs from npm's temporary folder (_npx), which npm may delete, and the entries name it. Keep a copy that stays (git clone, or npm install -g github:nrzz/everyhook) and run install again from it.");
         emit(installJson(plan, { ...ctx, needs }), installText(plan, { ...ctx, needs }));
         return plan.results.some((r) => r.action === "refused") ? 1 : 0;
       }

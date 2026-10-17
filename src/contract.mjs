@@ -1,7 +1,6 @@
 // The contract between everyhook and a hook: the names of the agents, the events and the kinds of tool; the document a hook reads on
 // stdin; and the check of the answer it may print. Nothing here knows an agent: src/agents/*.mjs turn each agent's JSON into this document
 // and the answer back into the agent's JSON.
-import path from "node:path";
 
 export const CONTRACT_VERSION = 1;
 export const AGENTS = ["claude-code", "codex", "gemini-cli", "copilot-cli", "cursor"];
@@ -61,7 +60,7 @@ export function readAnswer(stdout) {
 }
 
 /** The name a hook goes by in messages and in default reasons. */
-export const hookName = (hook) => path.basename(String(hook || "hook")).replace(/\.[^.]+$/, "") || "hook";
+export const hookName = (hook) => String(hook || "hook").split(/[\\/]/).pop().replace(/\.[^.]+$/, "") || "hook";
 
 export const isEvent = (e) => EVENTS.includes(e);
 export const isAgent = (a) => AGENTS.includes(a);

@@ -5,7 +5,7 @@ import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
-import { commandFor, findOnPath, runHook } from "../src/hookproc.mjs";
+import { commandFor, findGitBash, findOnPath, runHook } from "../src/hookproc.mjs";
 
 const has = (cmd, args) => { try { return spawnSync(cmd, args, { stdio: "ignore", windowsHide: true }).status === 0; } catch { return false; } };
 
@@ -26,19 +26,27 @@ test("commandFor: .ps1 with PowerShell, .sh with bash, .cmd and .bat with cmd.ex
   assert.deepEqual(commandFor("/h/x.cmd", [], { platform: "linux" }), { file: "/h/x.cmd", args: [] }, ".cmd is only special on Windows");
 });
 
-test("commandFor: a .sh hook on Windows takes Git Bash, never the WSL launcher or the Store alias", () => {
+test("findGitBash: Git Bash, never the WSL launcher in System32 or the Store alias; null when there is none", () => {
+  const present = new Set(["C:\\Program Files\\Git\\bin\\bash.exe", "C:\\Windows\\System32\\bash.exe", "C:\\Users\\me\\AppData\\Local\\Microsoft\\WindowsApps\\bash.exe", "D:\\Tools\\Git\\bin\\bash.exe"]);
+  const exists = (p) => present.has(p);
+  assert.equal(findGitBash({ PATH: "C:\\Windows\\System32;C:\\Program Files\\Git\\cmd" }, exists), "C:\\Program Files\\Git\\bin\\bash.exe", "bin next to a cmd folder on PATH");
+  assert.equal(findGitBash({ PATH: "C:\\Windows\\System32;C:\\Users\\me\\AppData\\Local\\Microsoft\\WindowsApps" }, exists), "C:\\Program Files\\Git\\bin\\bash.exe", "the launcher and the alias are skipped; Program Files is looked in");
+  assert.equal(findGitBash({ PATH: "D:\\Tools\\Git\\bin" }, exists), "D:\\Tools\\Git\\bin\\bash.exe", "a bash.exe on PATH itself");
+  assert.equal(findGitBash({ PATH: "C:\\Windows\\System32", ProgramFiles: "E:\\none", "ProgramFiles(x86)": "E:\\none2" }, (p) => p === "C:\\Windows\\System32\\bash.exe"), null);
+  assert.equal(findGitBash({ PATH: "C:\\Windows\\System32", ProgramFiles: "D:\\Tools" }, exists), "D:\\Tools\\Git\\bin\\bash.exe", "ProgramFiles names the folder");
+});
+
+test("commandFor: a .sh hook on Windows is run by the bash that was found, or is an error that says it needs one", () => {
+  if (!IS_WIN) return;
   const w = world("sh");
   const git = path.join(w.base, "Git");
   fs.mkdirSync(path.join(git, "bin"), { recursive: true });
   fs.mkdirSync(path.join(git, "cmd"), { recursive: true });
   fs.writeFileSync(path.join(git, "bin", "bash.exe"), "");
-  const wsl = path.join(w.base, "Windows", "System32");
-  fs.mkdirSync(wsl, { recursive: true });
-  fs.writeFileSync(path.join(wsl, "bash.exe"), "");
-  const env = { PATH: `${wsl};${path.join(git, "cmd")}` };
-  assert.equal(commandFor("C:\\h\\x.sh", [], { platform: "win32", env }).file, path.resolve(path.join(git, "cmd", "..", "bin", "bash.exe")));
-  const none = commandFor("C:\\h\\x.sh", [], { platform: "win32", env: { PATH: wsl, ProgramFiles: path.join(w.base, "nope"), "ProgramFiles(x86)": path.join(w.base, "nope2") } });
-  assert.match(none.error || "", /needs bash/);
+  const env = { PATH: path.join(git, "cmd") };
+  assert.equal(commandFor("C:\\h\\x.sh", [], { platform: "win32", env }).file.toLowerCase(), path.join(git, "bin", "bash.exe").toLowerCase());
+  const none = commandFor("C:\\h\\x.sh", [], { platform: "win32", env: { PATH: "C:\\nowhere", ProgramFiles: path.join(w.base, "nope"), "ProgramFiles(x86)": path.join(w.base, "nope2") } });
+  if (none.error) assert.match(none.error, /needs bash/);
 });
 
 test("findOnPath: the first file of that name on PATH, with the extensions of PATHEXT on Windows", () => {

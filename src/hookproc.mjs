@@ -24,20 +24,21 @@ export function findOnPath(name, env = process.env, platform = process.platform)
   return null;
 }
 
-/** A bash for a .sh hook on Windows: Git Bash, not the WSL launcher in System32 or the Store alias. */
-function findGitBash(env) {
+/** A bash for a .sh hook on Windows: Git Bash, not the WSL launcher in System32 or the Store alias. `exists` is for the tests. */
+export function findGitBash(env, exists = fs.existsSync) {
+  const P = path.win32;
   for (const dir of pathList(env, "win32")) {
     if (/\\(system32|windowsapps)\\?$/i.test(dir)) continue;
-    const file = path.join(dir, "bash.exe");
-    if (fs.existsSync(file)) return file;
+    const file = P.join(dir, "bash.exe");
+    if (exists(file)) return file;
     // a Git for Windows folder on PATH is often cmd or mingw64\bin: bash.exe is in bin next to them
-    const near = path.join(dir, "..", "bin", "bash.exe");
-    if (/\\(cmd|mingw64\\bin|usr\\bin)$/i.test(dir) && fs.existsSync(near)) return path.resolve(near);
+    const near = P.join(dir, "..", "bin", "bash.exe");
+    if (/\\(cmd|mingw64\\bin|usr\\bin)$/i.test(dir) && exists(near)) return P.normalize(near);
   }
   for (const base of [env.ProgramFiles, env["ProgramFiles(x86)"], "C:\\Program Files"]) {
     if (!base) continue;
-    const file = path.join(base, "Git", "bin", "bash.exe");
-    if (fs.existsSync(file)) return file;
+    const file = P.join(base, "Git", "bin", "bash.exe");
+    if (exists(file)) return file;
   }
   return null;
 }
