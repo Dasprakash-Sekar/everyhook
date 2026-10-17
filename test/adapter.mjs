@@ -25,6 +25,14 @@ export const REACHED = {
   "copilot-cli": { preContext: false, postDeny: false, postContext: true, promptBlocked: false },
 };
 
+// What each agent did with a call when everyhook itself could not start (its files were gone), without and with --fail-closed.
+// Only Claude Code has a field for it (onFailure: block); Copilot CLI denies on any non-zero exit by itself.
+export const GONE = {
+  "claude-code": { open: "ran", closed: "blocked" },
+  codex: { open: "ran", closed: "ran" },
+  "gemini-cli": { open: "ran", closed: "ran" },
+  "copilot-cli": { open: "blocked", closed: "blocked" },
+};
 
 export const readLog = (file) => (fs.existsSync(file) ? fs.readFileSync(file, "utf8").split("\n").filter(Boolean).map((l) => JSON.parse(l)) : []);
 

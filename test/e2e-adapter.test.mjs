@@ -12,7 +12,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import { TESTED } from "./conformance.mjs";
-import { REACHED, TOOL_CASES, allText, install, session, setup, uninstall } from "./adapter.mjs";
+import { GONE, REACHED, TOOL_CASES, allText, install, session, setup, uninstall } from "./adapter.mjs";
 import { everyhook } from "./session.mjs";
 
 const T = 600000;
@@ -25,6 +25,8 @@ const configFiles = (agent, sb) => ({
   "copilot-cli": [path.join(sb.copilot, "hooks", "everyhook.json")],
 })[agent];
 // Gemini CLI hands the model its refusal as { "error": "..." }
+// the file `install --scope project` writes, relative to the project
+const PROJECT_FILE = { "claude-code": ".claude/settings.json", codex: ".codex/hooks.json", "gemini-cli": ".gemini/settings.json", "copilot-cli": ".github/hooks/everyhook.json" };
 const plain = (text) => { try { const j = JSON.parse(text); return j && typeof j.error === "string" ? j.error : text; } catch { return text; } };
 const bytesOf = (files) => files.map((f) => (fs.existsSync(f) ? fs.readFileSync(f).toString("hex") : null));
 
@@ -91,6 +93,33 @@ for (const agent of AGENTS) {
     assert.deepEqual(steps.map((st) => ran.has(st.shell)), [false, false, true], `${agent}: ${JSON.stringify(o.results.map((r) => r.text.slice(0, 80)))}`);
     assert.match(plain(o.results[0].text), /everyhook: the hook printed text that is not one JSON object/);
     assert.match(plain(o.results[1].text), /everyhook: the hook "answer-hook" did not finish in 4 seconds/);
+  });
+
+  test(`${agent}: when everyhook itself cannot start (its files are gone), the call is ${GONE[agent].open === "ran" ? "let through" : "denied"}, and with --fail-closed ${GONE[agent].closed === "ran" ? "still let through" : "denied"}`, { skip, timeout: T }, async () => {
+    for (const closed of [false, true]) {
+      const s = setup(agent, closed ? "gone-closed" : "gone-open", ["log"]);
+      const o = await session(s, [{ shell: "echo GONE-ONE" }], {
+        before: async () => {
+          await install(s, "log", closed ? ["--fail-closed"] : []);
+          fs.renameSync(s.bin, `${s.bin}.gone`);
+        },
+      });
+      assert.equal(o.r.code, 0, `${agent}: ${o.r.err.slice(0, 300)}`);
+      assert.equal(o.results.length, 1, "the call got a result");
+      const got = o.results[0].text.includes("GONE-ONE") ? "ran" : "blocked";
+      assert.equal(got, GONE[agent][closed ? "closed" : "open"], `${agent} ${closed ? "with" : "without"} --fail-closed: ${o.results[0].text.slice(0, 160)}`);
+    }
+  });
+
+  test(`${agent}: install --scope project writes the file of the project, and the agent runs the hook from it`, { skip, timeout: T }, async () => {
+    const s = setup(agent, "project", ["log"]);
+    const o = await session(s, [{ shell: "echo PROJ-ONE" }], { before: () => install(s, "log", ["--scope", "project", "--event", "pre-tool,post-tool"]) });
+    assert.equal(o.r.code, 0, `${agent}: ${o.r.err.slice(0, 300)}`);
+    const projectFile = path.join(s.sb.work, PROJECT_FILE[agent]);
+    assert.ok(fs.existsSync(projectFile), `${PROJECT_FILE[agent]} is in the project`);
+    for (const f of configFiles(agent, s.sb)) assert.ok(!fs.existsSync(f) || !fs.readFileSync(f, "utf8").includes("everyhook"), "nothing was written to the home folder");
+    assert.deepEqual(o.everyhookLog.map((d) => d.event), ["pre-tool", "post-tool"], "the hook of the project ran before and after the call");
+    assert.ok(o.results[0].text.includes("PROJ-ONE"), "the call ran");
   });
 
   test(`${agent}: a prompt that a hook refuses`, { skip, timeout: T }, async () => {

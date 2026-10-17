@@ -120,7 +120,7 @@ export const ROWS = [
     cells: {
       "claude-code": cell("Git Bash, or PowerShell when Git Bash is not installed (the shell field chooses). One command field.", "binary", { case: "windows-shell" }),
       codex: cell("PowerShell: powershell.exe -NoProfile -Command \"<command>\", or pwsh.exe when PowerShell 7 is installed. commandWindows replaces the command on Windows. Exit codes other than 0 become 1.", "binary", { case: "windows-shell" }),
-      "gemini-cli": cell("PowerShell: powershell.exe -NoProfile -NonInteractive -Command \"<command>; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }\", which keeps exit codes.", "binary", { case: "windows-shell" }),
+      "gemini-cli": cell("PowerShell: powershell.exe -NoProfile -NonInteractive -Command \"<command>; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }\", which keeps exit codes (pwsh.exe -NoProfile -Command with the same relay where PowerShell 7 is installed).", "binary", { case: "windows-shell" }),
       "copilot-cli": cell("the powershell field on Windows (powershell.exe -nop -nol -c, or pwsh.exe when PowerShell 7 is installed) and bash elsewhere, or exec + args, which start the program with no shell.", "binary", { case: "windows-shell" }),
       cursor: cell("one command field.", "docs"),
     },

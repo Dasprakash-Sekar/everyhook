@@ -13,7 +13,7 @@ const T = 600000;
 const SHELL = {
   "claude-code": /bash\.exe"? -c /,
   codex: /(powershell|pwsh)\.exe"? -NoProfile -Command /,
-  "gemini-cli": /(powershell|pwsh)\.exe"? -NoProfile -NonInteractive -Command .*\$LASTEXITCODE/,
+  "gemini-cli": /(powershell|pwsh)\.exe"? -NoProfile (-NonInteractive )?-Command .*\$LASTEXITCODE/,
   "copilot-cli": /(powershell|pwsh)\.exe"? -nop -nol -c /,
 };
 
