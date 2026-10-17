@@ -111,7 +111,7 @@ test("a Gemini hooks entry that is not an array is a problem of the file, with w
   w.write(path.join(w.gemini, "settings.json"), J({ hooks: { enabled: true, BeforeTool: [{ hooks: [{ type: "command", command: `${node} -e 0` }] }] } }));
   const j = await listJson(w);
   const f = j.files.find((x) => x.agent === "gemini-cli");
-  assert.deepEqual(f.problems, ['hooks.enabled is not an array (it is boolean): Gemini CLI rejects the settings ("Expected array")']);
+  assert.deepEqual(f.problems, ['hooks.enabled is not an array (it is boolean): Gemini CLI prints "Invalid configuration" ("Expected array") for this file at every start']);
   assert.equal(j.entries.length, 1);
 });
 
@@ -122,15 +122,17 @@ test("a Gemini hook of another type than command is a problem", async () => {
   assert.match(j.entries[0].problems[0], /supports only hooks of type "command", not "http"/);
 });
 
-test("a Copilot hooks file with a version other than 1 is a problem, and its folder is read as a whole", async () => {
+test("a Copilot hooks file with a version other than 1 is a problem (one with no version ran on the real binary, so it is not), and its folder is read as a whole", async () => {
   const w = world("list");
   w.write(path.join(w.copilot, "hooks", "a.json"), J({ version: 2, hooks: { preToolUse: [{ type: "command", bash: `${node} -e 0`, timeoutSec: 5 }] } }));
   w.write(path.join(w.copilot, "hooks", "b.json"), J({ version: 1, hooks: { postToolUse: [{ type: "command", powershell: `${node} -e 0` }] } }));
+  w.write(path.join(w.copilot, "hooks", "c.json"), J({ hooks: { sessionStart: [{ type: "command", bash: `${node} -e 0` }] } }));
   w.write(path.join(w.copilot, "hooks", "notes.txt"), "not a hooks file");
   const j = await listJson(w);
-  assert.deepEqual(j.entries.map((e) => [path.basename(e.file), e.event]), [["a.json", "preToolUse"], ["b.json", "postToolUse"]]);
+  assert.deepEqual(j.entries.map((e) => [path.basename(e.file), e.event]), [["a.json", "preToolUse"], ["b.json", "postToolUse"], ["c.json", "sessionStart"]]);
+  assert.deepEqual(j.files.find((f) => path.basename(f.file) === "c.json").problems, []);
   const a = j.files.find((f) => path.basename(f.file) === "a.json");
-  assert.match(a.problems[0], /^"version" is 2: Copilot CLI hook files need "version": 1/);
+  assert.match(a.problems[0], /^"version" is 2: Copilot CLI ignores a hook file whose version is not 1, without a word$/);
   assert.deepEqual(j.files.find((f) => path.basename(f.file) === "b.json").problems, []);
 });
 

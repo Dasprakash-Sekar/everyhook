@@ -250,6 +250,18 @@ test("the table of what every agent did through everyhook is TOOL_CASES, and the
   ]);
 });
 
+test("the table of what was put to each binary has the versions of the recordings, the cases and the documents", () => {
+  const t = tableAfter("\n| Agent | Version | Raw outputs put to it |", "| Agent | Version | Raw outputs put to it |");
+  const four = ["claude-code", "codex", "gemini-cli", "copilot-cli"];
+  const label = { "claude-code": "Claude Code", codex: "Codex CLI", "gemini-cli": "Gemini CLI", "copilot-cli": "Copilot CLI" };
+  assert.deepEqual(t.rows.map((r) => r[0]), [...four.map((a) => label[a]), "Cursor"]);
+  four.forEach((a, i) => {
+    const rec = JSON.parse(readText("fixtures", "conformance", a + ".json"));
+    assert.deepEqual(t.rows[i].slice(0, 4), [label[a], rec.agentVersion, String(casesFor(a).length), String(countFiles(file("fixtures", a)))], a);
+  });
+  assert.deepEqual(t.rows[4].slice(0, 4), ["Cursor", "not run", "none", countFiles(file("fixtures", "cursor")) + " written from the reference"]);
+});
+
 test("the table of what the agents did when everyhook could not start is GONE", () => {
   const word = { ran: "the call runs", blocked: "the call is denied" };
   const four = ["claude-code", "codex", "gemini-cli", "copilot-cli"];

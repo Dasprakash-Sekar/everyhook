@@ -120,8 +120,8 @@ export function listHooks({ env = process.env, platform = process.platform, proj
         } else {
           parsed = readHooks(text, layout);
           if (!parsed.ok) { rec.status = "unreadable"; rec.problems.push(`${parsed.problem}; ${mod.name} cannot read it`); continue; }
-          if (agent === "copilot-cli" && parsed.value.hooks !== undefined && parsed.value.version !== 1 && /[\\/]hooks[\\/][^\\/]+\.json$/i.test(file)) rec.problems.push(`"version" is ${JSON.stringify(parsed.value.version)}: Copilot CLI hook files need "version": 1, and rejects the whole file otherwise`);
-          for (const p of parsed.problems) rec.problems.push(agent === "gemini-cli" ? `${p}: Gemini CLI rejects the settings ("Expected array")` : p);
+          if (agent === "copilot-cli" && parsed.value.hooks !== undefined && parsed.value.version !== undefined && parsed.value.version !== 1 && /[\\/]hooks[\\/][^\\/]+\.json$/i.test(file)) rec.problems.push(`"version" is ${JSON.stringify(parsed.value.version)}: Copilot CLI ignores a hook file whose version is not 1, without a word`);
+          for (const p of parsed.problems) rec.problems.push(agent === "gemini-cli" ? `${p}: Gemini CLI prints "Invalid configuration" ("Expected array") for this file at every start` : p);
         }
         if (agent === "codex" && parsed.entries.length) (codexHooksIn[path.dirname(file)] = codexHooksIn[path.dirname(file)] || []).push(rec);
         for (const raw of parsed.entries) {

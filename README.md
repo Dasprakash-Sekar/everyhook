@@ -39,15 +39,17 @@ What each cell rests on is in [What was verified, and how](#what-was-verified-an
 
 ## Install
 
-**From a terminal**, with Node 18 or newer. There is nothing to install and no dependency. `list`, `bench` and `explain` only read, and run from anywhere:
+**From a terminal**, with Node 18 or newer. There is nothing to install and no dependency. `list` and `explain` only read, and run from anywhere:
 
 ```bash
 npx -y github:nrzz/everyhook explain
 ```
 
 ```bash
-npx -y github:nrzz/everyhook bench examples/block-force-push.mjs
+npx -y github:nrzz/everyhook list
 ```
+
+`bench` needs a hook file to run, such as the ones in `examples/` of a clone.
 
 **`install` needs a copy that stays.** The entries it writes name the path of `bin/everyhook.mjs` and of your hook. `npx` runs a copy in npm's cache, which npm may delete (`install` says so when it sees that), so clone the repository, or install it for good, and use that copy:
 
@@ -147,7 +149,7 @@ and may print one JSON document on stdout:
 - Paths are the agent's own: Claude Code sends backslashes on Windows, and a check written with `/` never matches them. The folders of recorded documents are `<project>` and `<home>` in [`fixtures/`](fixtures/).
 - `decision` is `allow`, `deny` or `ask`. `reason` goes to the model where the agent supports it, `message` goes to the person where it does, `context` is added context where the event allows it. No output, or exit 0 with nothing printed, is no opinion.
 - **`allow` is an approval, not "no objection".** On Claude Code it skips the permission prompt (seen: in the default permission mode, in a headless run, `mkdir` was refused for want of approval, and the hook's `allow` let it through). Print nothing when you only look; `log-tool-calls` does.
-- A hook that exits with a non-zero code is a deny, with its stderr as the reason (at `stop`, where a deny sends the agent back to work, only exit code 2 is: a hook that crashed must not do that). A hook that cannot start, runs past its time or prints something that is not one JSON object of that shape is ignored with a `message` to the person, and with `--fail-closed` it is a deny before a tool and on a prompt. Exit codes never reach the agent: `run` always answers in the agent's JSON, which is the one form that delivers the reason on all four recorded binaries, and the only one that works on Codex CLI for Windows.
+- A hook that exits with a non-zero code is a deny, with its stderr as the reason (at `stop`, where a deny sends the agent back to work, only exit code 2 is: a hook that crashed must not do that). A hook that cannot start, runs past its time or prints something that is not one JSON object of that shape is ignored with a `message` to the person, and with `--fail-closed` it is a deny before a tool and on a prompt. The exit code of your hook never reaches the agent: `run` always answers in the agent's JSON, which is the one form that delivers the reason on all four recorded binaries, and the only one that works on Codex CLI for Windows.
 - The hook runs in the folder the agent works in, with the environment the agent has plus `EVERYHOOK=1`, `EVERYHOOK_AGENT` and `EVERYHOOK_EVENT`. One exception was seen: when `GITHUB_SHA` is set (a GitHub Actions run), Gemini CLI starts hooks with a short list of variables (`PATH`, `HOME`, `TEMP`, `SHELL`, `GEMINI_*` and the like), so a variable such as `EVERYHOOK_PROTECTED_BRANCHES` or `EVERYHOOK_LOG` set on the agent does not reach the hook there; keep such settings in the hook itself when Gemini CLI runs in CI.
 
 Where each event is, and what each agent calls it (the names `install` writes):
@@ -192,7 +194,7 @@ $ echo '{"hook_event_name":"PreToolUse","tool_name":"Bash","tool_input":{"comman
 {"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"Force-pushing the protected branch \"main\" is blocked. Push without --force, or ask the person to allow it."}}
 ```
 
-`--timeout <seconds>` is how long the hook may run (25 by default; `install` writes the agent's timeout minus 2). `--fail-closed` turns a failure of the hook into a deny before a tool and on a prompt. `EVERYHOOK_DEBUG=1` writes what happened to stderr (the document the hook got, what it answered, what was printed), and stdout stays the agent's. `--json` prints the whole result for a person. A command line that `run` cannot parse is exit 2 (a usage error), which blocks on the agents where exit code 2 blocks.
+`--timeout <seconds>` is how long the hook may run (25 by default; `install` writes the agent's timeout minus 2). `--fail-closed` turns a failure of the hook into a deny before a tool and on a prompt. `EVERYHOOK_DEBUG=1` writes what happened to stderr (the document the hook got, what it answered, what was printed), and stdout stays the agent's. `--json` prints the whole result for a person. A command line that `run` cannot parse is exit 2 (a usage error).
 
 ### `install`
 
@@ -262,8 +264,8 @@ Still to do:
 #### What still needs you
 
 - **Codex CLI** runs a hook only after you trust its definition (`/hooks` in Codex), or for one run with `--dangerously-bypass-hook-trust`. A hook that is not trusted is skipped, and `codex exec` says nothing about it (seen: the force push ran, and no event of the run mentioned hooks).
-- **Gemini CLI** fingerprints project hooks: it asks before it runs one it has not seen, and again when the entry changes. A user-level hook needs nothing.
-- **Copilot CLI** loads project hooks only in a trusted folder. It runs the hooks of an event in order and stops at the first deny (seen: a logging hook installed after `block-force-push` never saw the blocked call; installed before it, it did).
+- **Gemini CLI** fingerprints project hooks: it asks before it runs one it has not seen, and again when the entry changes (`docs`). A user-level hook needs nothing (seen).
+- **Copilot CLI** loads project hooks only in a trusted folder (`docs`). It runs the hooks of an event in order and stops at the first deny (seen: a logging hook installed after `block-force-push` never saw the blocked call; installed before it, it did).
 - **Cursor** watches its `hooks.json` and reloads it (documented).
 - Every agent reads its settings when a session starts: start a new one.
 
@@ -290,7 +292,7 @@ cursor       deleted the file (it held only this entry)  ~\.cursor\hooks.json
 
 ### `restore`
 
-`restore (--agent <a,b,...> | --all)` puts the newest `.bak-everyhook-*` backup of each file `install` writes back, and backs up the file as it is first, so that a `restore` can be undone by another. After the `install` above:
+`restore (--agent <a,b,...> | --all)` puts the newest `.bak-everyhook-*` backup of each file `install` writes back, and backs up the file as it is first, so that a `restore` can be undone by another. After `everyhook install examples/block-force-push.mjs --agent claude-code`:
 
 ```text
 $ everyhook restore --agent claude-code --dry-run
@@ -337,8 +339,9 @@ codex
 | a timeout in the wrong unit: 30 for Gemini CLI is 30 milliseconds; 30000 for the others is more than an hour | every entry |
 | a matcher that is not a regular expression | every entry |
 | a hook of a type Gemini CLI does not run (it runs `command` only) | Gemini CLI |
-| a `hooks` entry that is not an array: Gemini CLI rejects the settings | Gemini CLI |
-| a hooks file whose `version` is not 1: Copilot CLI rejects the file | Copilot CLI |
+| a `hooks` entry that is not an array: Gemini CLI prints "Invalid configuration" ("Expected array") for the file at every start | Gemini CLI |
+| a hooks file whose `version` is there and is not 1: Copilot CLI ignores the file, without a word (a file with no `version` ran) | Copilot CLI |
+| an entry with no command | every entry |
 | hooks in `hooks.json` and in `config.toml` of one layer: Codex merges them and warns at every start | Codex CLI |
 | a hook in the project's `.claude/settings.json` or `settings.local.json`: Copilot CLI reads those files too and will run it | Claude Code |
 | a file that is not JSON (or not TOML this reader knows) | every file |
@@ -466,13 +469,23 @@ On Windows `~` is `%USERPROFILE%`. `everyhook explain <agent>` prints every path
 
 ### Privacy
 
-It reads the agents' configuration files listed above, on your machine, and the hooks and recorded documents you point it at. It writes only with `install`, `uninstall` and `restore` (the one file per agent and scope, after a backup next to it), and starts only the hooks you name. It has no network code at all, no telemetry and no account: nothing is sent to anyone, and a test fails if any file under `src/` or `bin/` imports a module that opens a connection, starts a program anywhere but `src/hookproc.mjs`, or writes a file anywhere but `src/write.mjs`, or anything but a `node:` module. `list` shows the commands your hooks run, with your paths in them: remove those before you paste a report into an issue. The recorded fixtures are made in throwaway folders, hold `<project>`, `<home>` and `<tmp>` in place of their paths, and a test fails if one holds the name of whoever recorded it. See also [SECURITY.md](SECURITY.md).
+It reads the agents' configuration files listed above, on your machine, and the hooks and recorded documents you point it at. It writes only with `install`, `uninstall` and `restore` (the one file per agent and scope, after a backup next to it), and starts only the hooks you name. It has no network code, no telemetry and no account: nothing is sent to anyone. Tests hold that to the code: nothing under `src/` or `bin/` imports anything but a `node:` module or opens a connection, only `src/hookproc.mjs` starts a program, and only `src/write.mjs` writes a file. The hooks you install do what they do; `log-tool-calls` writes the file you name. `list` shows the commands your hooks run, with your paths in them: remove those before you paste a report into an issue. The recorded fixtures are made in throwaway folders, hold `<project>`, `<home>` and `<tmp>` in place of their paths, and a test fails if one holds the name of whoever recorded it. See also [SECURITY.md](SECURITY.md).
 
 ## What was verified, and how
 
 What this README says an agent does is what the agent's real binary did, unless the sentence says `docs`. The binaries were Claude Code 2.1.302, Codex CLI 0.163.0, Gemini CLI 0.64.0 and GitHub Copilot CLI 1.0.98, on Windows 11 (10.0.26300) with Node 24.19.0 on 17 October 2026; and on every push, on GitHub's Windows, macOS and Linux runners, with the newest version npm has of each (`e2e.yml`).
 
 **No token is spent and no login is needed.** Each agent runs against a small fake of its model API on 127.0.0.1 that answers from a script, one tool call per turn: the Messages API for Claude Code, the Responses API for Codex CLI, `generateContent` for Gemini CLI and the chat completions API for Copilot CLI. The agent runs in a throwaway home folder, with the variables that point it at its configuration (`HOME`, `USERPROFILE`, `CLAUDE_CONFIG_DIR`, `CODEX_HOME`, `COPILOT_HOME`, `GEMINI_CLI_HOME`) set to it, so nothing of yours is read or written. What happened is read back from the agent's own tool results (did the model see the reason, or the output of the command), from the requests the agent made, and from a log that a hook writes.
+
+| Agent | Version | Raw outputs put to it | Documents recorded from it | Also put to it |
+| --- | --- | --- | --- | --- |
+| Claude Code | 2.1.302 | 13 | 13 | `allow` in the default permission mode |
+| Codex CLI | 0.163.0 | 13 | 12 | a hook that is not trusted |
+| Gemini CLI | 0.64.0 | 14 | 14 | a short environment under `GITHUB_SHA`, a `hooks` entry that is not an array |
+| Copilot CLI | 1.0.98 | 12 | 14 | a hook file with `"version": 2` |
+| Cursor | not run | none | 11 written from the reference | nothing |
+
+Each of the four was also put through everyhook: `install` and `uninstall`, every answer at a tool event, `--fail-closed`, a refused prompt, session start and stop, `--scope project`, and a missing everyhook. The sections below give the results.
 
 ### What the four binaries do with a hook's raw output
 
@@ -533,13 +546,15 @@ When everyhook itself cannot start (its files were moved or deleted, and the ent
 
 At `session-start` the context a hook returned was in the first request to the model, in all four. A `stop` hook that denied once sent the agent back to work with the reason as the next prompt, and the second `stop` document carried the agent's flag that it had been sent back already. Codex CLI does not run a hook that is not trusted, and `codex exec` says nothing about it: the force push ran, and no event of the run mentioned hooks. Copilot CLI runs the hooks of an event in order and stops at the first deny, so a logging hook installed after `block-force-push` never saw the blocked call. When `GITHUB_SHA` is set, Gemini CLI starts a hook with a short environment (see [The contract](#the-contract)).
 
+Two problems that `list` reports were put to the binaries that have them. Gemini CLI printed `Invalid configuration` and `Expected array` for a `hooks` entry that was an object, and went on with the run. Copilot CLI ignored a hook file with `"version": 2` without a word, and ran files with `"version": 1` and with no `version`.
+
 ### The recorded documents
 
 [`fixtures/`](fixtures/) holds 53 documents that the four binaries sent a hook (a force push, a harmless command, an edit, a write to an environment file and a read, before and after the tool; a prompt; the start and the end of a session; a stop), each with the agent, its version, the system and the date, and 11 for Cursor that are written from its reference and say `"source": "documented"` (`bench` prints `documented, not recorded` for them). A test fails if one holds the name of whoever recorded it. `RECORD_FIXTURES=1 E2E_CLAUDE=... node test/record.mjs fixtures` records them again.
 
 ### The tests and CI
 
-**290 automated tests** (`npm test`; that is what `node --test` reports, less each of the 15 helper files that it lists as a test and that does nothing without its variable). 39 of them put the code to the real binaries and are skipped unless `E2E_CLAUDE`, `E2E_CODEX`, `E2E_GEMINI` and `E2E_COPILOT` name them; the others need nothing but Node, and a few skip themselves where a system lacks something (the right to make symlinks, on Windows). They cover every module, the editing of JSON by text with a fuzz round trip of 400 cases, ten layouts that `uninstall` must give back to the byte, and the 180 cases of the translation table (5 agents, 6 events, 6 answers).
+**293 automated tests** (`npm test`; that is what `node --test` reports, less each of the 15 helper files that it lists as a test and that does nothing without its variable). 41 of them put the code to the real binaries and are skipped unless `E2E_CLAUDE`, `E2E_CODEX`, `E2E_GEMINI` and `E2E_COPILOT` name them; the others need nothing but Node, and a few skip themselves where a system lacks something (the right to make symlinks, on Windows). They cover every module, the editing of JSON by text with a fuzz round trip of 400 cases, ten layouts that `uninstall` must give back to the byte, and the 180 cases of the translation table (5 agents, 6 events, 6 answers).
 
 `test.yml` runs the suite on Windows, macOS and Linux with Node 20, 22 and 24, and on Linux with Node 18. `e2e.yml` installs the four agents from npm on each of the three systems and runs the real-binary checks; it runs on every push and every week, so that a new version of an agent that changes any cell above fails there first. An agent that cannot be installed skips its checks with the reason and does not fail the run.
 
@@ -618,11 +633,11 @@ At `session-start` the context a hook returned was in the first request to the m
 
 ## Contributing
 
-Bug reports, ideas and pull requests are welcome; start with [CONTRIBUTING.md](CONTRIBUTING.md) and the [good first issue](https://github.com/nrzz/everyhook/issues/1). The rules: no dependencies, every change with a test, every statement about an agent put to the real binary (or marked `docs`), the settings files are the user's, and nothing wastes anyone's tokens.
+Bug reports, ideas and pull requests are welcome; start with [CONTRIBUTING.md](CONTRIBUTING.md) and the [good first issue](https://github.com/nrzz/everyhook/issues/1). The rules: no dependencies, every change with a test, every statement about an agent put to the real binary (or marked `docs`), the settings files are the user's, and nothing wastes anyone's tokens. `npm test` needs nothing but Node. To run the real-binary checks too, set `E2E_CLAUDE`, `E2E_CODEX`, `E2E_GEMINI` and `E2E_COPILOT` to the commands or the full paths of the binaries; they run against a fake API and spend no token.
 
 ## Also by the same author
 
-Everyhook is by the author of the [Claude Code toolkit](https://github.com/nrzz/claude-code-toolkit), nineteen tools for Claude Code; the two closest to this one are [claude-hook-bench](https://github.com/nrzz/claude-hook-bench), which runs every Claude Code hook with the JSON Claude Code sends and shows what each one does, and [claude-code-guardrails](https://github.com/nrzz/claude-code-guardrails), safety presets that stop risky commands and edits.
+everyhook is by the author of the [Claude Code toolkit](https://github.com/nrzz/claude-code-toolkit), nineteen tools for Claude Code; the two closest to this one are [claude-hook-bench](https://github.com/nrzz/claude-hook-bench), which runs every Claude Code hook with the JSON Claude Code sends and shows what each one does, and [claude-code-guardrails](https://github.com/nrzz/claude-code-guardrails), safety presets that stop risky commands and edits.
 
 ## License
 
