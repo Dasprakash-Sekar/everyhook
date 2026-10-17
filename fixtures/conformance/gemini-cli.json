@@ -52,6 +52,6 @@
   },
   "windowsShell": {
     "name": "powershell.exe",
-    "commandLine": "powershell.exe -NoProfile -NonInteractive -Command \"node \\<record-hook>\" BeforeTool act; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }\""
+    "commandLine": "powershell.exe -NoProfile -NonInteractive -Command \"node <record-hook> BeforeTool act; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }\""
   }
 }

@@ -49,6 +49,6 @@
   },
   "windowsShell": {
     "name": "bash.exe",
-    "commandLine": "\"E:\\Das\\Git\\bin\\..\\usr\\bin\\bash.exe\" -c \"node \\<record-hook>\" PreToolUse act\""
+    "commandLine": "\"bash.exe\" -c \"node <record-hook> PreToolUse act\""
   }
 }

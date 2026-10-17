@@ -49,6 +49,6 @@
   },
   "windowsShell": {
     "name": "powershell.exe",
-    "commandLine": "\"C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe\" -NoProfile -Command \"node \\<record-hook>\" PreToolUse act\""
+    "commandLine": "\"powershell.exe\" -NoProfile -Command \"node <record-hook> PreToolUse act\""
   }
 }

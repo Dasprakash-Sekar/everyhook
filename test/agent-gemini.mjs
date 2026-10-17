@@ -96,10 +96,12 @@ export function baseSettings(extra = {}) {
   return { security: { auth: { selectedType: "gemini-api-key" } }, privacy: { usageStatisticsEnabled: false }, general: { previewFeatures: false }, ...extra };
 }
 
+// GITHUB_SHA and SURFACE are removed: with either set (a GitHub Actions run) Gemini CLI starts hooks and tools with a short list of environment
+// variables, so that the hook would not get EH_LOG; the one test about that (test/e2e-adapter.test.mjs) puts GITHUB_SHA back on purpose.
 export function envFor(w, api, extra = {}) {
   return scrubbedEnv({
     HOME: w.home, USERPROFILE: w.home, GEMINI_CLI_HOME: w.home, APPDATA: w.env.APPDATA, LOCALAPPDATA: w.env.LOCALAPPDATA,
-    GEMINI_API_KEY: "fake", GOOGLE_GEMINI_BASE_URL: `http://127.0.0.1:${api.port}`, GEMINI_CLI_TRUST_WORKSPACE: "true", GEMINI_CLI_NO_RELAUNCH: "1", NO_BROWSER: "1", NO_COLOR: "1",
+    GEMINI_API_KEY: "fake", GOOGLE_GEMINI_BASE_URL: `http://127.0.0.1:${api.port}`, GEMINI_CLI_TRUST_WORKSPACE: "true", GEMINI_CLI_NO_RELAUNCH: "1", NO_BROWSER: "1", NO_COLOR: "1", GITHUB_SHA: undefined, SURFACE: undefined,
     ...extra,
   });
 }

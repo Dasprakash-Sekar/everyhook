@@ -53,7 +53,7 @@ export const ROWS = [
     title: "A hook that exits with code 2 (everyhook never relies on it)",
     cells: {
       "claude-code": cell("blocks; stderr is the reason the model sees.", "binary", { case: "exit2", outcome: "blocked+reason" }),
-      codex: cell("on Windows the call runs: Codex starts the command through powershell.exe -NoProfile -Command, which turns every non-zero exit code into 1. Elsewhere it blocks (docs).", "binary", { case: "exit2", outcome: "ran" }),
+      codex: cell("on Windows the call runs: Codex starts the command through PowerShell -NoProfile -Command, which turns every non-zero exit code into 1. On Linux and macOS it blocks, with stderr as the reason; code 2 with nothing on stderr runs the call.", "binary", { case: "exit2", outcome: "ran" }),
       "gemini-cli": cell("blocks, and stderr is the reason, but only when stderr is not empty; code 2 with no stderr text runs the call.", "binary", { case: "exit2", outcome: "blocked+reason" }),
       "copilot-cli": cell("denies, but the model does not see stderr: it sees only that the hook errored.", "binary", { case: "exit2", outcome: "blocked" }),
       cursor: cell("blocks (equivalent to permission deny).", "docs"),
@@ -119,10 +119,21 @@ export const ROWS = [
     title: "Which shell runs the command on Windows",
     cells: {
       "claude-code": cell("Git Bash, or PowerShell when Git Bash is not installed (the shell field chooses). One command field.", "binary", { case: "windows-shell" }),
-      codex: cell("powershell.exe -NoProfile -Command \"<command>\". commandWindows replaces the command on Windows. Exit codes other than 0 become 1.", "binary", { case: "windows-shell" }),
-      "gemini-cli": cell("one command field, run by the CLI's own shell handling.", "docs"),
-      "copilot-cli": cell("the powershell field on Windows and bash elsewhere, or exec + args, which start the program with no shell.", "binary", { case: "windows-shell" }),
+      codex: cell("PowerShell: powershell.exe -NoProfile -Command \"<command>\", or pwsh.exe when PowerShell 7 is installed. commandWindows replaces the command on Windows. Exit codes other than 0 become 1.", "binary", { case: "windows-shell" }),
+      "gemini-cli": cell("PowerShell: powershell.exe -NoProfile -NonInteractive -Command \"<command>; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }\", which keeps exit codes.", "binary", { case: "windows-shell" }),
+      "copilot-cli": cell("the powershell field on Windows (powershell.exe -nop -nol -c, or pwsh.exe when PowerShell 7 is installed) and bash elsewhere, or exec + args, which start the program with no shell.", "binary", { case: "windows-shell" }),
       cursor: cell("one command field.", "docs"),
+    },
+  },
+  {
+    id: "environment",
+    title: "The environment the hook gets",
+    cells: {
+      "claude-code": cell("the agent's own: a variable set on the agent reaches the hook.", "binary", { case: "env" }),
+      codex: cell("the agent's own: a variable set on the agent reaches the hook.", "binary", { case: "env" }),
+      "gemini-cli": cell("the agent's own, except when GITHUB_SHA is set or SURFACE is Github (a GitHub Actions run): then only a short list (PATH, HOME, TEMP, SHELL, GEMINI_* and the like), and EVERYHOOK_PROTECTED_BRANCHES, EVERYHOOK_LOG or any variable of your own does not reach the hook.", "binary", { case: "env-github" }),
+      "copilot-cli": cell("the agent's own: a variable set on the agent reaches the hook.", "binary", { case: "env" }),
+      cursor: cell("not documented.", "docs"),
     },
   },
   {

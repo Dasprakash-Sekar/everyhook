@@ -12,23 +12,11 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import { TESTED } from "./conformance.mjs";
-import { allText, install, session, setup, uninstall } from "./adapter.mjs";
+import { REACHED, TOOL_CASES, allText, install, session, setup, uninstall } from "./adapter.mjs";
+import { everyhook } from "./session.mjs";
 
 const T = 600000;
 const AGENTS = ["claude-code", "codex", "gemini-cli", "copilot-cli"];
-
-// What each agent did with an answer at a tool event, through everyhook: the same for the four agents.
-const TOOL_CASES = [
-  ["deny", "blocked+reason"], ["ask", "blocked+reason"], ["allow", "ran"], ["context", "ran"], ["exit2", "blocked+reason"],
-  ["exit1", "blocked+reason"], ["invalid", "ran"], ["slow", "ran"], ["none", "ran"],
-];
-// What reached the model, by agent: context at pre-tool, and a deny / context at post-tool.
-const REACHED = {
-  "claude-code": { preContext: true, postDeny: true, postContext: true, promptBlocked: true },
-  codex: { preContext: true, postDeny: true, postContext: true, promptBlocked: true },
-  "gemini-cli": { preContext: false, postDeny: true, postContext: true, promptBlocked: true },
-  "copilot-cli": { preContext: false, postDeny: false, postContext: true, promptBlocked: false },
-};
 
 const configFiles = (agent, sb) => ({
   "claude-code": [path.join(sb.claude, "settings.json")],
@@ -135,4 +123,26 @@ test("codex: a hook that is not trusted does not run, and `codex exec` says noth
   assert.ok(!o.results[0].text.includes("Force-pushing"), "so the force push was not blocked: it ran (and git, in a folder that is not a repository, said so)");
   assert.match(o.results[0].text, /not a git repository/);
   assert.ok(!o.r.events.some((e) => /hook/i.test(JSON.stringify(e))), "no event of the run mentions hooks");
+});
+
+// Seen in the first run of e2e.yml: on GitHub's runners Gemini CLI starts hooks with a short list of environment variables (it does so when
+// GITHUB_SHA is set, or SURFACE is Github), so a variable set on the agent does not reach the hook. The other three agents pass it on.
+test("gemini-cli: with GITHUB_SHA set (a GitHub Actions run) a hook gets a short environment, and EVERYHOOK_* or EH_* set on the agent do not reach it", { skip: TESTED["gemini-cli"].skip(), timeout: T }, async () => {
+  const seen = {};
+  for (const mode of ["plain", "github"]) {
+    const s = setup("gemini-cli", `env-${mode}`);
+    const out = path.join(s.sb.base, "env.json");
+    const probe = s.sb.hook("probe.mjs", `import fs from "node:fs"; try { fs.readFileSync(0); } catch {} fs.writeFileSync(${JSON.stringify(out)}, JSON.stringify(process.env));`);
+    const env = { EVERYHOOK_PROBE: "1", MY_OWN_SETTING: "x", ...(mode === "github" ? { GITHUB_SHA: "0123456789abcdef" } : {}) };
+    const before = async () => { const r = await everyhook(s.sb, s.bin, ["install", probe, "--agent", "gemini-cli", "--event", "pre-tool"]); assert.equal(r.code, 0, r.all); };
+    const o = await session(s, [{ shell: "echo hi" }], { env, before });
+    assert.equal(o.r.code, 0, `${mode}: ${o.r.err.slice(0, 300)}`);
+    assert.ok(fs.existsSync(out), `${mode}: the hook ran`);
+    seen[mode] = Object.keys(JSON.parse(fs.readFileSync(out, "utf8"))).map((k) => k.toUpperCase());
+  }
+  for (const k of ["EVERYHOOK_PROBE", "MY_OWN_SETTING", "EH_LOG"]) assert.ok(seen.plain.includes(k), `plain: ${k} reaches the hook`);
+  for (const k of ["EVERYHOOK_PROBE", "MY_OWN_SETTING", "EH_LOG", "EVERYHOOK_LOG"]) assert.ok(!seen.github.includes(k), `github: ${k} does not reach the hook`);
+  assert.ok(seen.github.includes("PATH") && seen.github.includes("HOME"), "a short environment still has PATH and HOME");
+  assert.ok(seen.github.length < seen.plain.length, "and fewer variables than without GITHUB_SHA");
+  for (const k of ["EVERYHOOK", "EVERYHOOK_AGENT", "EVERYHOOK_EVENT"]) assert.ok(seen.github.includes(k), `${k} is set by everyhook run itself`);
 });

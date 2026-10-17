@@ -34,7 +34,7 @@ test("the whole table as text: a block per question, a line per agent with its b
   assert.equal(r.code, 0);
   assert.match(r.out, /^How the five coding agents differ on hooks\. \[binary\] = a real run of the agent saw it, \[docs\] = its documentation says so\.\n/);
   for (const row of ROWS) assert.ok(r.out.includes(`${row.title}\n`), row.title);
-  assert.match(r.out, /\n  codex {8}\[binary\] on Windows the call runs: Codex starts the command through powershell\.exe/);
+  assert.match(r.out, /\n  codex {8}\[binary\] on Windows the call runs: Codex starts the command through PowerShell -NoProfile -Command/);
   assert.match(r.out, /\n  cursor {7}\[docs\] {3}/);
   assert.ok(r.out.endsWith("for what everyhook prints for each answer.\n"));
 });

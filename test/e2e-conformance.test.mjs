@@ -9,11 +9,12 @@ import { TESTED, casesFor, expected, runCases } from "./conformance.mjs";
 
 const T = 600000;
 
+// PowerShell is powershell.exe (5.1) or, on a machine that has PowerShell 7 (GitHub's Windows runners do), pwsh.exe
 const SHELL = {
   "claude-code": /bash\.exe"? -c /,
-  codex: /powershell\.exe"? -NoProfile -Command /,
-  "gemini-cli": /powershell\.exe -NoProfile -NonInteractive -Command .*\$LASTEXITCODE/,
-  "copilot-cli": /powershell\.exe"? -nop -nol -c /,
+  codex: /(powershell|pwsh)\.exe"? -NoProfile -Command /,
+  "gemini-cli": /(powershell|pwsh)\.exe"? -NoProfile -NonInteractive -Command .*\$LASTEXITCODE/,
+  "copilot-cli": /(powershell|pwsh)\.exe"? -nop -nol -c /,
 };
 
 async function runWell(agent, opts) {

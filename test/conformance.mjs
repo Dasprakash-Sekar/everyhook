@@ -77,7 +77,7 @@ export function casesFor(agent) {
  */
 export const EXPECT = {
   "claude-code": { empty: "ran", exit2: "blocked+reason", exit2n: "blocked", exit1: "ran", exit3: "ran", invalid: "ran", plain: "ran", timeout: "ran", "deny-json": "blocked+reason", "legacy-block": "blocked+reason", "allow-json": "ran", ctx: "context", "ask-json": "blocked+reason" },
-  codex: { empty: "ran", exit2: { win32: "ran", other: "blocked+reason" }, exit2n: { win32: "ran", other: "blocked" }, exit1: "ran", exit3: "ran", invalid: "ran", plain: "ran", timeout: "ran", "deny-json": "blocked+reason", "legacy-block": "blocked+reason", "allow-json": "ran", ctx: "context", "ask-json": "ran" },
+  codex: { empty: "ran", exit2: { win32: "ran", other: "blocked+reason" }, exit2n: "ran", exit1: "ran", exit3: "ran", invalid: "ran", plain: "ran", timeout: "ran", "deny-json": "blocked+reason", "legacy-block": "blocked+reason", "allow-json": "ran", ctx: "context", "ask-json": "ran" },
   "gemini-cli": { empty: "ran", exit2: "blocked+reason", exit2n: "ran", exit1: "ran", exit3: "blocked+reason", invalid: "ran", plain: "ran", timeout: "ran", "deny-json": "blocked+reason", "block-json": "blocked+reason", "allow-json": "ran", "deny-noreason": "blocked", ctx: "none", "ask-json": "ended" },
   "copilot-cli": { empty: "ran", exit2: "blocked", exit2n: "blocked", exit1: "blocked", exit3: "blocked", invalid: "ran", plain: "ran", timeout: "ran", "deny-json": "blocked+reason", "ask-json": "blocked+reason", "allow-json": "ran", "deny-noreason": "blocked" },
 };

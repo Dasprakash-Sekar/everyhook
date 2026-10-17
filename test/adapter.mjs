@@ -12,6 +12,20 @@ export const HOOKS = {
   answer: path.join(ROOT, "test", "answer-hook.mjs"),
 };
 
+// What each agent did with an answer at a tool event, through everyhook: the same for the four agents.
+export const TOOL_CASES = [
+  ["deny", "blocked+reason"], ["ask", "blocked+reason"], ["allow", "ran"], ["context", "ran"], ["exit2", "blocked+reason"],
+  ["exit1", "blocked+reason"], ["invalid", "ran"], ["slow", "ran"], ["none", "ran"],
+];
+// What reached the model, by agent: context at pre-tool, and a deny / context at post-tool.
+export const REACHED = {
+  "claude-code": { preContext: true, postDeny: true, postContext: true, promptBlocked: true },
+  codex: { preContext: true, postDeny: true, postContext: true, promptBlocked: true },
+  "gemini-cli": { preContext: false, postDeny: true, postContext: true, promptBlocked: true },
+  "copilot-cli": { preContext: false, postDeny: false, postContext: true, promptBlocked: false },
+};
+
+
 export const readLog = (file) => (fs.existsSync(file) ? fs.readFileSync(file, "utf8").split("\n").filter(Boolean).map((l) => JSON.parse(l)) : []);
 
 /** A world for an agent with a copy of everyhook (in a folder with a space) and the hooks asked for (copied to a folder with a space). */

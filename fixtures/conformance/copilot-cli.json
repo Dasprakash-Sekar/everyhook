@@ -46,6 +46,6 @@
   },
   "windowsShell": {
     "name": "powershell.exe",
-    "commandLine": "\"powershell.exe\" -nop -nol -c \"node \\<record-hook>\" preToolUse act\""
+    "commandLine": "\"powershell.exe\" -nop -nol -c \"node <record-hook> preToolUse act\""
   }
 }

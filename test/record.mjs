@@ -47,7 +47,9 @@ if (mode === "fixtures") {
     if (mod.skip()) { console.log(`${agent}: skipped (${mod.skip()})`); continue; }
     const r = await runCases(agent, { parent: process.platform === "win32" });
     const cases = Object.fromEntries(Object.entries(r.cases).map(([id, c]) => [id, { outcome: c.outcome, ...(c.stopped !== undefined ? { stopped: c.stopped } : {}) }]));
-    const parent = r.parent ? { name: r.parent.name, commandLine: r.parent.commandLine.replace(/\\?"?[A-Za-z]:[\\/][^" ]*record-hook\.mjs\\?"?/g, "<record-hook>") } : null;
+    // the folders of this machine are left out: the hook's path becomes <record-hook>, the shell's folder is dropped
+    const scrub = (line) => line.replace(/\\?"?[A-Za-z]:[\\/][^" ]*record-hook\.mjs\\?"?/g, "<record-hook>").replace(/^"[A-Za-z]:[^"]*[\\/]([^\\/"]+\.exe)"/, '"$1"');
+    const parent = r.parent ? { name: r.parent.name, commandLine: scrub(r.parent.commandLine) } : null;
     write(path.join(ROOT, "fixtures", "conformance", `${agent}.json`), { agent, agentVersion: r.version, os: osName, node: process.versions.node, date, hookTimeoutSeconds: 10, cases, ...(parent ? { windowsShell: parent } : {}) });
     console.log(`${agent} ${r.version}: ${Object.keys(cases).length} cases in ${r.ms} ms`);
   }
