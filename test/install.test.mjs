@@ -1,6 +1,6 @@
 // install, uninstall and restore against throwaway homes: what is written for each agent, that existing content is not touched, that a
 // second install changes nothing, that a file that cannot be read is left alone, and that uninstall gives the bytes back.
-import { world, run, snapshot, ROOT } from "./helpers.mjs";
+import { world, run, snapshot, copyDir, ROOT } from "./helpers.mjs";
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
@@ -174,7 +174,7 @@ test("--dry-run writes nothing, not even a backup, and says what would happen", 
 test("paths with spaces: everyhook and the hook may live in folders with spaces, in the line and in exec + args", async () => {
   const w = world("inst space");
   const copy = path.join(w.base, "every hook");
-  for (const d of ["bin", "src"]) fs.cpSync(path.join(ROOT, d), path.join(copy, d), { recursive: true });
+  for (const d of ["bin", "src"]) copyDir(path.join(ROOT, d), path.join(copy, d));
   fs.copyFileSync(path.join(ROOT, "package.json"), path.join(copy, "package.json"));
   const hook = path.join(w.base, "my hooks", "block force push.mjs");
   fs.mkdirSync(path.dirname(hook), { recursive: true });

@@ -1,0 +1,69 @@
+name: Bug report
+description: Something in everyhook does not work as described
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. Please remove secrets, tokens and private paths from anything you paste. `list` and `install` print the paths of your configuration files, which contain your user name.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, and what happened instead. For a wrong statement about an agent (what it does with a hook's answer), say what the agent really did.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. everyhook install examples/block-force-push.mjs --agent codex
+        2. Ask Codex to run ...
+        3. See ...
+    validations:
+      required: true
+  - type: dropdown
+    id: agent
+    attributes:
+      label: Which agent?
+      options:
+        - Claude Code
+        - Codex CLI
+        - Gemini CLI
+        - GitHub Copilot CLI
+        - Cursor
+        - More than one
+        - None: the tool itself
+    validations:
+      required: true
+  - type: input
+    id: agent-version
+    attributes:
+      label: Agent version
+      description: The output of `claude --version`, `codex --version`, `gemini --version` or `copilot --version`.
+      placeholder: "codex-cli 0.163.0"
+  - type: input
+    id: env
+    attributes:
+      label: System, Node and everyhook versions
+      description: The system (for Windows, `winver`), `node --version`, and `everyhook --version`.
+      placeholder: "Windows 11 24H2 (x64), Node 22.11, everyhook 1.0.0"
+    validations:
+      required: true
+  - type: dropdown
+    id: install
+    attributes:
+      label: How did you install it?
+      options:
+        - npx from GitHub
+        - The toolkit setup page (npx -y github:nrzz/claude-code-toolkit)
+        - git clone
+        - Other
+  - type: textarea
+    id: output
+    attributes:
+      label: Output or logs
+      description: The exact output of the command, with secrets removed. For a hook that behaves differently from `bench`, `EVERYHOOK_DEBUG=1` writes what `run` did to standard error, and `examples/log-tool-calls.mjs` records the document the agent sent.
+      render: text

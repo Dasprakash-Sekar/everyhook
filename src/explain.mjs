@@ -5,7 +5,7 @@ import { AGENTS, EVENTS, EVENT_INFO } from "./contract.mjs";
 import { MODULES, formsOf } from "./agents/index.mjs";
 import { ROWS } from "./conformance.mjs";
 import { locations } from "./locations.mjs";
-import { translate } from "./translate.mjs";
+import { EFFECTS, translate } from "./translate.mjs";
 
 /** The target of an explain: { agent, event } with null for what was not named. */
 export const resolveExplain = (agent, event) => ({ agent: agent || null, event: event || null });
@@ -73,7 +73,7 @@ export function explainText(target) {
     lines.push("How the five coding agents differ on hooks. [binary] = a real run of the agent saw it, [docs] = its documentation says so.", "");
     for (const r of ROWS) {
       lines.push(r.title);
-      for (const a of AGENTS) lines.push(`  ${a.padEnd(12)} [${r.cells[a].basis}] ${wrap(r.cells[a].text, 96, 22)}`);
+      for (const a of AGENTS) lines.push(`  ${a.padEnd(12)} ${`[${r.cells[a].basis}]`.padEnd(8)} ${wrap(r.cells[a].text, 92, 24)}`);
       lines.push("");
     }
     lines.push("Run everyhook explain <agent> for the config paths on each system, and everyhook explain <agent> <event> for what everyhook prints for each answer.");
@@ -82,7 +82,7 @@ export function explainText(target) {
   const mod = MODULES[target.agent];
   if (!target.event) {
     lines.push(`${mod.name} (${target.agent})`, "");
-    for (const r of ROWS) lines.push(`${r.title}`, `  [${r.cells[target.agent].basis}] ${wrap(r.cells[target.agent].text, 96, 11)}`, "");
+    for (const r of ROWS) lines.push(`${r.title}`, `  ${`[${r.cells[target.agent].basis}]`.padEnd(8)} ${wrap(r.cells[target.agent].text, 92, 11)}`, "");
     lines.push("Tool names and their kind:");
     for (const [name, kind] of mod.TOOLS) lines.push(`  ${name.padEnd(20)} ${kind}`);
     for (const [, kind, shown] of mod.TOOL_PATTERNS) lines.push(`  ${shown.padEnd(20)} ${kind}`);
@@ -100,7 +100,7 @@ export function explainText(target) {
   lines.push(`${mod.name}, ${target.event} (${mod.NATIVE[target.event]}): ${EVENT_INFO[target.event]}`, "", "What everyhook prints for each answer of the hook:");
   for (const row of eventTable(target.agent, target.event)) {
     lines.push(`  ${row.answer.padEnd(13)} ${row.native === null ? "(nothing)" : row.native}`);
-    lines.push(`  ${"".padEnd(13)} ${wrap(`${row.effect === "none" ? "nothing changes" : row.effect}${row.notes.length ? `; ${row.notes.join("; ")}` : ""}`, 90, 14)}`);
+    lines.push(`  ${"".padEnd(13)} ${wrap(`${EFFECTS[row.effect] || row.effect}${row.notes.length ? `; ${row.notes.join("; ")}` : ""}`, 90, 14)}`);
   }
   lines.push("", `It can take: ${["deny", "ask", "allow", "context", "message"].filter((k) => f[k] || (k === "message" && f.messageWith)).join(", ") || "nothing"}.`);
   return `${lines.join("\n")}\n`;

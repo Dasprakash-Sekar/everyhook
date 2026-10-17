@@ -88,6 +88,14 @@ export function world(name = "w") {
   return w;
 }
 
+/** Copies a folder with everything in it (fs.cpSync is experimental before Node 22). */
+export function copyDir(from, to) {
+  fs.mkdirSync(to, { recursive: true });
+  for (const e of fs.readdirSync(from, { withFileTypes: true })) {
+    if (e.isDirectory()) copyDir(path.join(from, e.name), path.join(to, e.name)); else fs.copyFileSync(path.join(from, e.name), path.join(to, e.name));
+  }
+}
+
 /** Every file under a folder with its bytes, as { relative path: hex digest }, to compare two states of a folder. */
 export function snapshot(dir) {
   const out = {};

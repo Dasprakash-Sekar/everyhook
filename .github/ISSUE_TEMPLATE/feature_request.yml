@@ -1,0 +1,61 @@
+name: Feature request
+description: An idea for everyhook
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What are you trying to do with your coding agents, and what gets in the way? A link to the agent's issue or documentation helps.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: The idea
+      description: How should it work? What should a command do, or what should the contract carry?
+    validations:
+      required: true
+  - type: dropdown
+    id: agents
+    attributes:
+      label: Which agents does it concern?
+      multiple: true
+      options:
+        - Claude Code
+        - Codex CLI
+        - Gemini CLI
+        - GitHub Copilot CLI
+        - Cursor
+        - A new agent (name it in the idea)
+        - None: the tool itself
+    validations:
+      required: true
+  - type: dropdown
+    id: tokens
+    attributes:
+      label: Token cost
+      description: Would it put anything new in front of a model? Every user pays for that.
+      options:
+        - "No: it runs outside the model"
+        - "Only when a hook returns a reason or context"
+        - "A few tokens per session"
+        - "Not sure"
+    validations:
+      required: true
+  - type: dropdown
+    id: changes
+    attributes:
+      label: Would it change anything on the computer?
+      description: Today only `install`, `uninstall` and `restore` do, and they change one configuration file per agent after a backup.
+      options:
+        - "No: it only reads"
+        - "Yes: it would write something (say what in the idea)"
+        - "Not sure"
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you considered

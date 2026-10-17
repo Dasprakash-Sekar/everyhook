@@ -1,0 +1,51 @@
+{
+  "agent": "copilot-cli",
+  "agentVersion": "1.0.98",
+  "os": "win32 x64, Windows 11 Home Single Language 10.0.26300",
+  "node": "24.19.0",
+  "date": "2026-10-17",
+  "hookTimeoutSeconds": 10,
+  "cases": {
+    "empty": {
+      "outcome": "ran"
+    },
+    "exit2": {
+      "outcome": "blocked"
+    },
+    "exit2n": {
+      "outcome": "blocked"
+    },
+    "exit1": {
+      "outcome": "blocked"
+    },
+    "exit3": {
+      "outcome": "blocked"
+    },
+    "invalid": {
+      "outcome": "ran"
+    },
+    "plain": {
+      "outcome": "ran"
+    },
+    "timeout": {
+      "outcome": "ran",
+      "stopped": true
+    },
+    "deny-json": {
+      "outcome": "blocked+reason"
+    },
+    "allow-json": {
+      "outcome": "ran"
+    },
+    "deny-noreason": {
+      "outcome": "blocked"
+    },
+    "ask-json": {
+      "outcome": "blocked+reason"
+    }
+  },
+  "windowsShell": {
+    "name": "powershell.exe",
+    "commandLine": "\"powershell.exe\" -nop -nol -c \"node \\<record-hook>\" preToolUse act\""
+  }
+}

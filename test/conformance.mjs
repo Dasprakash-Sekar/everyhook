@@ -110,19 +110,19 @@ const POST = /^(PostToolUse|AfterTool|postToolUse)$/;
  * Puts the cases to the real binary of an agent in one run, one tool call per case. Returns
  * { agent, version, code, ms, requests, cases: { id: { outcome, modelSaw, ran, elapsedMs } }, windowsShell }.
  */
-export async function runCases(agent, { timeoutSec = 10, cases = casesFor(agent), parent = false, extra = {} } = {}) {
+export async function runCases(agent, { timeoutSec = 10, cases = casesFor(agent), parent = false, extra = {}, command = (id) => `echo CASE-${id}`, permissions } = {}) {
   const mod = TESTED[agent];
   const sb = mod.sandbox("conf");
   const log = path.join(sb.base, "hook-log.jsonl");
   const casesFile = path.join(sb.base, "cases.json");
   fs.writeFileSync(casesFile, J(Object.fromEntries(cases.map((c) => [c.id, c.behavior]))));
-  const steps = cases.map((c) => ({ shell: `echo CASE-${c.id}` }));
+  const steps = cases.map((c) => ({ shell: command(c.id) }));
   const api = await mod.fake(steps);
   const env = { EH_LOG: log, EH_CASES: casesFile, ...(parent ? { EH_PARENT: "1" } : {}), ...extra };
   const conf = hooksConfig(agent, timeoutSec);
   let r;
   try {
-    if (agent === "claude-code") { sb.write(sb.settings, conf.settings); r = await mod.run(sb, api, { env, timeout: 280000 }); }
+    if (agent === "claude-code") { sb.write(sb.settings, conf.settings); r = await mod.run(sb, api, { env, timeout: 280000, ...(permissions ? { args: permissions } : {}) }); }
     else if (agent === "codex") { mod.configure(sb, api); sb.write(sb.hooksJson, conf.hooksJson); r = await mod.run(sb, { env, timeout: 280000 }); }
     else if (agent === "gemini-cli") { sb.write(sb.settings, conf.settings); r = await mod.run(sb, api, { env, timeout: 280000 }); }
     else { sb.write(path.join(sb.hooksDir, "rec.json"), conf.copilotFile); r = await mod.run(sb, api, { env, timeout: 280000 }); }

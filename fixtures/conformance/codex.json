@@ -1,0 +1,54 @@
+{
+  "agent": "codex",
+  "agentVersion": "0.163.0",
+  "os": "win32 x64, Windows 11 Home Single Language 10.0.26300",
+  "node": "24.19.0",
+  "date": "2026-10-17",
+  "hookTimeoutSeconds": 10,
+  "cases": {
+    "empty": {
+      "outcome": "ran"
+    },
+    "exit2": {
+      "outcome": "ran"
+    },
+    "exit2n": {
+      "outcome": "ran"
+    },
+    "exit1": {
+      "outcome": "ran"
+    },
+    "exit3": {
+      "outcome": "ran"
+    },
+    "invalid": {
+      "outcome": "ran"
+    },
+    "plain": {
+      "outcome": "ran"
+    },
+    "timeout": {
+      "outcome": "ran",
+      "stopped": true
+    },
+    "deny-json": {
+      "outcome": "blocked+reason"
+    },
+    "allow-json": {
+      "outcome": "ran"
+    },
+    "legacy-block": {
+      "outcome": "blocked+reason"
+    },
+    "ctx": {
+      "outcome": "context"
+    },
+    "ask-json": {
+      "outcome": "ran"
+    }
+  },
+  "windowsShell": {
+    "name": "powershell.exe",
+    "commandLine": "\"C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe\" -NoProfile -Command \"node \\<record-hook>\" PreToolUse act\""
+  }
+}

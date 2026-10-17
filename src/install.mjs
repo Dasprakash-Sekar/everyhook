@@ -54,7 +54,6 @@ function needsFor(agent, scope) {
  */
 export function planInstall(opts) {
   const { hook, agents, events, scope, project, matcher, timeout = 30, failClosed = false, everyhook, env, platform } = opts;
-  const runTimeout = Math.max(1, timeout - 2);
   const results = [];
   for (const agent of agents) {
     const mod = agentModule(agent);
@@ -82,10 +81,14 @@ export function planInstall(opts) {
         const native = mod.NATIVE[event];
         const useMatcher = matcher && (event === "pre-tool" || event === "post-tool") ? matcher : undefined;
         if (matcher && !useMatcher) res.notes.push(`--matcher is for tool events: ignored for ${event}`);
+        // the agent's limit for this event, and a little less for the hook itself, so that everyhook stops it before the agent stops everyhook
+        const limit = Math.min(timeout, (layout.maxTimeout && layout.maxTimeout[event]) || Infinity);
+        if (limit < timeout) res.notes.push(`${event}: ${mod.name} allows ${limit} seconds, so the timeout is ${limit}, not ${timeout}`);
+        const runTimeout = Math.max(1, limit - 2);
         const words = runWords({ everyhook, agent, event, hook, failClosed, timeout: runTimeout, platform });
-        const handler = layout.handler({ command: runLine({ everyhook, agent, event, hook, failClosed, timeout: runTimeout, platform }), exec: words[0], args: words.slice(1), timeout, failClosed, name: `everyhook ${path.basename(hook)}` });
+        const handler = layout.handler({ command: runLine({ everyhook, agent, event, hook, failClosed, timeout: runTimeout, platform }), exec: words[0], args: words.slice(1), timeout: limit, failClosed, name: `everyhook ${path.basename(hook)}` });
         text = addEntry(text, layout, native, handler, useMatcher);
-        res.entries.push({ event, native, matcher: useMatcher || null, timeout, can: canDo(mod, event) });
+        res.entries.push({ event, native, matcher: useMatcher || null, timeout: limit, can: canDo(mod, event) });
       }
       if (failClosed && agent === "gemini-cli") res.notes.push("--fail-closed: Gemini CLI has no switch for it; everyhook turns a hook that fails or times out into a deny itself");
       if (failClosed && agent === "codex") res.notes.push("--fail-closed: Codex CLI has no switch for it; everyhook turns a hook that fails or times out into a deny itself");

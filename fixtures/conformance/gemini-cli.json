@@ -1,0 +1,57 @@
+{
+  "agent": "gemini-cli",
+  "agentVersion": "0.64.0",
+  "os": "win32 x64, Windows 11 Home Single Language 10.0.26300",
+  "node": "24.19.0",
+  "date": "2026-10-17",
+  "hookTimeoutSeconds": 10,
+  "cases": {
+    "empty": {
+      "outcome": "ran"
+    },
+    "exit2": {
+      "outcome": "blocked+reason"
+    },
+    "exit2n": {
+      "outcome": "ran"
+    },
+    "exit1": {
+      "outcome": "ran"
+    },
+    "exit3": {
+      "outcome": "blocked+reason"
+    },
+    "invalid": {
+      "outcome": "ran"
+    },
+    "plain": {
+      "outcome": "ran"
+    },
+    "timeout": {
+      "outcome": "ran",
+      "stopped": true
+    },
+    "deny-json": {
+      "outcome": "blocked+reason"
+    },
+    "block-json": {
+      "outcome": "blocked+reason"
+    },
+    "allow-json": {
+      "outcome": "ran"
+    },
+    "deny-noreason": {
+      "outcome": "blocked"
+    },
+    "ctx": {
+      "outcome": "none"
+    },
+    "ask-json": {
+      "outcome": "ended"
+    }
+  },
+  "windowsShell": {
+    "name": "powershell.exe",
+    "commandLine": "powershell.exe -NoProfile -NonInteractive -Command \"node \\<record-hook>\" BeforeTool act; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }\""
+  }
+}

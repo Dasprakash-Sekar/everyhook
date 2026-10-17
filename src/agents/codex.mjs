@@ -73,4 +73,6 @@ export const LAYOUT = {
   empty: () => ({}),
   handler: ({ command, timeout }) => ({ type: "command", command, timeout }),
   timeoutUnit: "s",
+  // Codex clamps a SessionEnd hook to 3 seconds and warns at every start when the file asks for more
+  maxTimeout: { "session-end": 3 },
 };

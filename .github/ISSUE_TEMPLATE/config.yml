@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions and ideas
+    url: https://github.com/nrzz/everyhook/discussions
+    about: Ask and discuss in GitHub Discussions.
+  - name: Security vulnerability
+    url: https://github.com/nrzz/everyhook/security/advisories/new
+    about: Report it privately, never in a public issue.

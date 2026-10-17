@@ -47,7 +47,7 @@ if (mode === "fixtures") {
     if (mod.skip()) { console.log(`${agent}: skipped (${mod.skip()})`); continue; }
     const r = await runCases(agent, { parent: process.platform === "win32" });
     const cases = Object.fromEntries(Object.entries(r.cases).map(([id, c]) => [id, { outcome: c.outcome, ...(c.stopped !== undefined ? { stopped: c.stopped } : {}) }]));
-    const parent = r.parent ? { name: r.parent.name, commandLine: r.parent.commandLine.replace(/\\\\/g, "\\").replace(/"?[A-Za-z]:[\\/][^" ]*record-hook\.mjs"?/g, "<record-hook>").replace(/\\"/g, '"') } : null;
+    const parent = r.parent ? { name: r.parent.name, commandLine: r.parent.commandLine.replace(/\\?"?[A-Za-z]:[\\/][^" ]*record-hook\.mjs\\?"?/g, "<record-hook>") } : null;
     write(path.join(ROOT, "fixtures", "conformance", `${agent}.json`), { agent, agentVersion: r.version, os: osName, node: process.versions.node, date, hookTimeoutSeconds: 10, cases, ...(parent ? { windowsShell: parent } : {}) });
     console.log(`${agent} ${r.version}: ${Object.keys(cases).length} cases in ${r.ms} ms`);
   }

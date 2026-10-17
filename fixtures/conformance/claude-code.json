@@ -1,0 +1,54 @@
+{
+  "agent": "claude-code",
+  "agentVersion": "2.1.302",
+  "os": "win32 x64, Windows 11 Home Single Language 10.0.26300",
+  "node": "24.19.0",
+  "date": "2026-10-17",
+  "hookTimeoutSeconds": 10,
+  "cases": {
+    "empty": {
+      "outcome": "ran"
+    },
+    "exit2": {
+      "outcome": "blocked+reason"
+    },
+    "exit2n": {
+      "outcome": "blocked"
+    },
+    "exit1": {
+      "outcome": "ran"
+    },
+    "exit3": {
+      "outcome": "ran"
+    },
+    "invalid": {
+      "outcome": "ran"
+    },
+    "plain": {
+      "outcome": "ran"
+    },
+    "timeout": {
+      "outcome": "ran",
+      "stopped": true
+    },
+    "deny-json": {
+      "outcome": "blocked+reason"
+    },
+    "allow-json": {
+      "outcome": "ran"
+    },
+    "legacy-block": {
+      "outcome": "blocked+reason"
+    },
+    "ctx": {
+      "outcome": "context"
+    },
+    "ask-json": {
+      "outcome": "blocked+reason"
+    }
+  },
+  "windowsShell": {
+    "name": "bash.exe",
+    "commandLine": "\"E:\\Das\\Git\\bin\\..\\usr\\bin\\bash.exe\" -c \"node \\<record-hook>\" PreToolUse act\""
+  }
+}
