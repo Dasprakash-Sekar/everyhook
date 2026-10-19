@@ -4,6 +4,10 @@ All notable changes to everyhook are written here. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+### Added
+
+- Short agent names: commands accept `claude` (for `claude-code`), `gemini` (for `gemini-cli`), and `copilot` (for `copilot-cli`) in `--agent`, `explain`, `run`, `bench`, `install`, and `list`. Output and configuration files continue to use canonical long ids ([#1](https://github.com/nrzz/everyhook/issues/1)).
+
 ## [1.0.0] - 2026-10-17
 
 - First release. A CLI that lets one hook run in Claude Code, Codex CLI, Gemini CLI, GitHub Copilot CLI and Cursor. Node 18 or newer, no dependencies.

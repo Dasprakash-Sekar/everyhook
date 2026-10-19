@@ -5,6 +5,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import path from "node:path";
 import { HELP, parseArgs } from "../src/cli.mjs";
+import { AGENT_ALIASES, agentId } from "../src/contract.mjs";
 import { VERSION } from "../src/version.mjs";
 
 const EXAMPLE = path.join(ROOT, "examples", "block-force-push.mjs");
@@ -21,6 +22,17 @@ test("parseArgs: commands, lists, scopes and the hook after --", () => {
   assert.equal(parseArgs(["explain", "codex", "pre-tool"]).positional.join(), "codex,pre-tool");
   assert.deepEqual(parseArgs(["bench", "h.mjs", "--fixture", "a.json", "--fixture", "b.json"]).fixture, ["a.json", "b.json"]);
   assert.equal(parseArgs(["list", "--agent=codex"]).agent[0], "codex", "--option=value works");
+  assert.deepEqual(parseArgs(["install", "h.mjs", "--agent", "claude,gemini,copilot"]).agent, ["claude-code", "gemini-cli", "copilot-cli"], "short agent names map to canonical ids");
+  assert.equal(parseArgs(["explain", "gemini", "pre-tool"]).positional.join(), "gemini-cli,pre-tool");
+  assert.equal(parseArgs(["list", "--agent", "claude"]).agent[0], "claude-code");
+  assert.equal(parseArgs(["bench", "h.mjs", "--agent", "copilot"]).agent[0], "copilot-cli");
+  assert.equal(parseArgs(["run", "--agent", "claude", "--event", "pre-tool", "--", "h.mjs"]).agent[0], "claude-code");
+  assert.equal(agentId("claude"), "claude-code");
+  assert.equal(agentId("gemini"), "gemini-cli");
+  assert.equal(agentId("copilot"), "copilot-cli");
+  assert.equal(agentId("claude-code"), "claude-code", "long name wins");
+  assert.equal(agentId("vim"), null);
+  assert.equal(agentId(null), null);
   assert.equal(parseArgs(["--help"]).help, true);
   assert.equal(parseArgs(["-v"]).version, true);
 });
@@ -136,3 +148,32 @@ test("run reads the agent's JSON from stdin when the process is started for real
   const atStop = runCli(["run", "--agent", "codex", "--event", "stop", "--fail-closed", "--", EXAMPLE], { env: w.env, cwd: w.work, input: "" });
   assert.equal(JSON.parse(atStop.out).systemMessage, "everyhook: the agent sent no input; the hook was ignored", "fail closed does not send the agent back to work");
 });
+
+test("short agent names: claude, gemini, copilot work across commands and JSON output uses long names", async () => {
+  const w = world("cli-short");
+  const inst = await run(["install", EXAMPLE, "--agent", "claude,gemini,copilot", "--dry-run", "--json"], { w });
+  assert.equal(inst.code, 0);
+  assert.deepEqual(inst.json().results.map((r) => r.agent), ["claude-code", "gemini-cli", "copilot-cli"]);
+
+  await run(["install", EXAMPLE, "--agent", "claude"], { w });
+  const ls = await run(["list", "--agent", "claude", "--json"], { w });
+  assert.equal(ls.code, 0);
+  assert.ok(ls.json().files.every((f) => f.agent === "claude-code"));
+  assert.equal(ls.json().entries[0].agent, "claude-code");
+
+  const exp = await run(["explain", "gemini", "--json"], { w });
+  assert.equal(exp.code, 0);
+  assert.equal(exp.json().agent, "gemini-cli");
+
+  const bn = await run(["bench", EXAMPLE, "--agent", "copilot", "--event", "pre-tool", "--json"], { w });
+  assert.equal(bn.code, 0);
+  assert.equal(bn.json().results[0].agent, "copilot-cli");
+
+  const rn = await run(["run", "--agent", "claude", "--event", "pre-tool", "--json", "--", EXAMPLE], {
+    w,
+    stdin: JSON.stringify({ hook_event_name: "PreToolUse", tool_name: "Bash", tool_input: { command: "git status" } }),
+  });
+  assert.equal(rn.code, 0);
+  assert.equal(rn.json().agent, "claude-code");
+});
+

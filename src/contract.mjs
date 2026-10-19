@@ -64,3 +64,21 @@ export const hookName = (hook) => String(hook || "hook").split(/[\\/]/).pop().re
 
 export const isEvent = (e) => EVENTS.includes(e);
 export const isAgent = (a) => AGENTS.includes(a);
+
+/** Short aliases accepted on the command line; the long name always wins. */
+export const AGENT_ALIASES = {
+  claude: "claude-code",
+  gemini: "gemini-cli",
+  copilot: "copilot-cli",
+};
+
+/**
+ * Returns the canonical agent id (from AGENTS) or null when unknown. The long name always wins.
+ */
+export function agentId(name) {
+  if (typeof name !== "string") return null;
+  if (AGENTS.includes(name)) return name;
+  if (Object.prototype.hasOwnProperty.call(AGENT_ALIASES, name)) return AGENT_ALIASES[name];
+  return null;
+}
+

@@ -2,7 +2,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { AGENTS, EVENTS, isAgent, isEvent } from "./contract.mjs";
+import { AGENTS, EVENTS, isAgent, isEvent, agentId } from "./contract.mjs";
 import { VERSION } from "./version.mjs";
 import { execute } from "./run.mjs";
 import { applyPlan, planInstall, planUninstall, restoreAll } from "./install.mjs";
@@ -116,7 +116,13 @@ export function parseArgs(argv) {
   if (o.positional.length > spec.positional) throw new UsageError(`${o.command} takes ${spec.positional === 0 ? "no name" : `at most ${spec.positional} name${spec.positional === 1 ? "" : "s"}`}, not "${o.positional.join(" ")}"`);
   if (o.agent !== null) {
     o.agent = list(o.agent);
-    for (const a of o.agent) if (!isAgent(a)) throw new UsageError(`unknown agent "${a}" (${AGENTS.join(", ")})`);
+    const resolved = [];
+    for (const a of o.agent) {
+      const id = agentId(a);
+      if (!id) throw new UsageError(`unknown agent "${a}" (${AGENTS.join(", ")})`);
+      resolved.push(id);
+    }
+    o.agent = resolved;
     if (!o.agent.length) throw new UsageError("--agent needs at least one agent");
   }
   if (o.all && o.agent) throw new UsageError("--all and --agent do not go together");
@@ -146,7 +152,11 @@ export function parseArgs(argv) {
   if (o.command === "restore" && !o.all && !o.agent) throw new UsageError("restore needs the agents: --agent <a,b,...> or --all");
   if (o.command === "install" && (o.fixture.length || o.given.has("fixture"))) throw new UsageError("install does not take --fixture");
   if (o.command === "explain") {
-    if (o.positional[0] && !isAgent(o.positional[0])) throw new UsageError(`explain takes an agent (${AGENTS.join(", ")}), not "${o.positional[0]}"`);
+    if (o.positional[0]) {
+      const id = agentId(o.positional[0]);
+      if (!id) throw new UsageError(`explain takes an agent (${AGENTS.join(", ")}), not "${o.positional[0]}"`);
+      o.positional[0] = id;
+    }
     if (o.positional[1] && !isEvent(o.positional[1])) throw new UsageError(`explain takes an event (${EVENTS.join(", ")}), not "${o.positional[1]}"`);
     if (o.positional[1] && !o.positional[0]) throw new UsageError("explain <agent> <event>: the agent comes first");
   }
